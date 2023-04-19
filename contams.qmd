@@ -1,0 +1,210 @@
+---
+title: "Investigating contaminants"
+format: html
+editor: visual
+---
+
+## Contaminants
+
+```{r}
+allUCMR <- read.csv("UCMR4_All.csv")
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+# install.packages("sf") # https://github.com/r-spatial/sf/issues/2035
+library(sf)
+library(tidycensus)
+options(tigris_use_cache = TRUE)
+library(tidyr)
+library(purrr)
+```
+
+
+```{r}
+# Checking which state has the most non-zero measurement values to work with
+
+allUCMR_wValues <- allUCMR %>% 
+  filter(!is.na(AnalyticalResultValue.µg.L.) & AnalyticalResultValue.µg.L. != 0)
+
+allUCMR_wValues %>% 
+  group_by(State) %>% 
+  summarize(NumMeasurements = length(AnalyticalResultValue.µg.L.)) %>% 
+  arrange(desc(NumMeasurements))
+
+allUCMR_wValues %>% 
+  filter(State == "CA") %>% 
+  group_by(Contaminant) %>% 
+  summarize(NumMeasurementsByContam = length(AnalyticalResultValue.µg.L.)) %>% 
+  arrange(desc(NumMeasurementsByContam))
+  
+```
+
+```{r}
+# Checking which state has the most non-zero, non-HAA# measurement values to work with
+# Since the HAAs are monitored by the EPA
+
+allUCMR_wValues_noHAA <- allUCMR %>% 
+  filter(!is.na(AnalyticalResultValue.µg.L.) & AnalyticalResultValue.µg.L. != 0
+         & !Contaminant %in% c("HAA9", "HAA5", "HAA6Br"))
+
+allUCMR_wValues_noHAA %>% 
+  group_by(State) %>% 
+  summarize(NumMeasurements = length(AnalyticalResultValue.µg.L.)) %>% 
+  arrange(desc(NumMeasurements))
+
+allUCMR_wValues_noHAA %>% 
+  filter(State == "CA") %>% 
+  group_by(Contaminant) %>% 
+  summarize(NumMeasurementsByContam = length(AnalyticalResultValue.µg.L.)) %>% 
+  arrange(desc(NumMeasurementsByContam))
+```
+
+```{r}
+# Checking which contaminant in CA has the most non-NA measurement values to work with
+
+allUCMR_nonNA <- allUCMR %>% 
+  filter(!is.na(AnalyticalResultValue.µg.L.))
+
+allUCMR_wValues %>% 
+  group_by(State) %>% 
+  summarize(NumMeasurements = length(AnalyticalResultValue.µg.L.)) %>% 
+  arrange(desc(NumMeasurements))
+
+allUCMR_wValues %>% 
+  filter(State == "CA") %>% 
+  group_by(Contaminant) %>% 
+  summarize(NumMeasurementsByContam = length(AnalyticalResultValue.µg.L.)) %>% 
+  arrange(desc(NumMeasurementsByContam))
+
+allUCMR_nonNA %>% 
+  filter(State == "CA") %>% 
+  group_by(Contaminant) %>% 
+  summarize(NumMeasurementsByContam = length(AnalyticalResultValue.µg.L.)) %>% 
+  arrange(desc(NumMeasurementsByContam))
+  
+```
+
+```{r}
+UCMR_CA <- allUCMR %>% 
+  filter(State == "CA")
+```
+
+
+```{r}
+bg_shapes <- get_acs(
+  geography = "block", 
+  variables = c("B02012_001", "B02001_001", "B02001_002", "B02009_001", "B02010_001", 
+                "B02011_001", "B02012_001", "B19013_001", "B03003_001", "B03003_003"),
+  state = "CA", 
+  year = 2020,
+  cache_table = TRUE,
+  geometry = TRUE
+) 
+
+
+
+```
+
+
+
+```{r}
+block_shapes <- get_decennial(
+  geography = "block", 
+  variables = c("P3_002N", "P3_003N", "P3_004N", "P3_005N", "P3_006N", 
+                "P3_007N", "P3_008N", "P4_001N", "P4_002N"),
+  state = "CA", 
+  year = 2020,
+  cache_table = TRUE,
+  geometry = TRUE
+) 
+```
+Note: 2020 decennial Census data use differential privacy, a technique that
+introduces errors into data to preserve respondent confidentiality.
+ℹ Small counts should be interpreted with caution.
+ℹ See https://www.census.gov/library/fact-sheets/2021/protecting-the-confidentiality-of-the-2020-census-redistricting-data.html for additional guidance.
+
+Total P3_002N	
+White P3_003N	
+Black P3_004N	
+Indigenous P3_005N	
+Asian P3_006N	
+Paci_Isl P3_007N	
+Other P3_008N 
+Total_hisp P4_001N	
+Hisp_Lat P4_002N	
+```{r}
+block_shapes <- block_shapes_tall %>% 
+  pivot_wider(names_from = "variable", values_from = "value") %>% 
+  rename(Total = P3_002N,	
+          White = P3_003N,	
+          Black = P3_004N,
+          Indigenous = P3_005N,	
+          Asian = P3_006N,
+          Paci_Isl = P3_007N,	
+          Other = P3_008N,
+          Total_Hisp = P4_001N,	
+          Hisp_Lat = P4_002N) %>% 
+  mutate(White = White / Total,
+         Black = Black / Total,
+         Indigenous = Indigenous / Total,
+         Asian = Asian / Total,
+         Paci_Isl = Paci_Isl / Total,
+         Other = Other / Total,
+         Hisp_Lat = Hisp_Lat / Total_Hisp
+         )
+
+block_shapes_tall2 <- block_shapes %>% 
+  pivot_longer(c(White, Black, Asian, Paci_Isl, Indigenous, Other), 
+               names_to = "race", values_to = "prop")
+
+ggplot(block_shapes_tall2, aes(x = race, y = prop, color = race)) + geom_col()
+
+block_shapes_vals <- block_shapes %>% 
+  filter(!(Total == 0 & Total_Hisp == 0))
+```
+
+```{r}
+ggplot(block_shapes_vals, aes(Total)) + geom_histogram() + scale_x_log10()
+```
+
+
+Vars
+
+Race total: B02001_001
+White alone B02001_002
+B02009_001 Black alone or in combination
+B02010_001 Native American alone or in combination
+B02011_001 Asian alone or in combination
+B02012_001 Native Hawaiian or Pacific Islander alone or in combination
+B19013_001 median household income
+Hispanic total: B03003_001
+B03003_003 yes hispanic or latino
+
+```{r}
+bg_shapes <- st_transform(bg_shapes, 4269) # make types compatible
+watershapes <- st_transform(watershapes, 4269)
+
+join <- watershapes %>% 
+  inner_join(UCMR_CA, by = c("pwsid" = "PWSID")) %>% 
+  select(pwsid, PWSName, primacy_agency_code, primary_source_code, tier, FacilityWaterType, 
+         CollectionDate, Contaminant, MRL, AnalyticalResultsSign, AnalyticalResultValue.µg.L.) %>% 
+  st_intersection(bg_shapes) %>% 
+  mutate(pwi_county = paste0(pwsid, "-", GEOID))
+
+
+joinTo <- join %>% 
+  #--- get area ---#
+  mutate(area = as.numeric(st_area(.))) %>% 
+  #--- get area-weight by HUC unit ---#
+  group_by(pwsid) %>% 
+  mutate(weight = area / sum(area)) %>% 
+  #--- calculate area-weighted corn acreage by HUC unit ---#
+  summarize(aw_acres = sum(weight * acres))
+
+```
+
+
+Create bool for yes, all present
+Create categorical for "predominantly ___ population"

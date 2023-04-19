@@ -1,0 +1,295 @@
+---
+title: "Mucking about"
+format: revealjs
+editor: visual
+editor_options: 
+  chunk_output_type: inline
+---
+
+questions I have: \* There are a lot of entries with NAs in the AnalyticalResultValue. No value recorded?
+
+Topics of discussion:
+
+-   Since these contaminants aren't monitored, they don't have recommended limits
+-   I think I may have to use american community survey data (from a sample whereas the census attempts
+-   Is using "alone or in combination" problematic for double counting
+
+Also include age? How are block groups formed? How are the blocks determined? When were they formed? Amendment --\> Vulnerable population disprop affected --\> taken into cost benefit analysis Clean Water act relation to data, where it sits in the regulation system? Why is this important?
+
+```{r}
+allUCMR <- read.csv("UCMR4_All.csv")
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+# install.packages("sf") # https://github.com/r-spatial/sf/issues/2035
+library(sf)
+library(tidycensus)
+options(tigris_use_cache = TRUE)
+```
+
+```{r}
+contamsCA <- allUCMR %>% 
+  filter(State == "CA") 
+
+looksee <- allUCMR %>% 
+  group_by(State, Contaminant) %>% 
+  summarize(count = n())
+
+```
+
+```{r}
+ggplot(looksee, aes(x=AnalyticalResultValue)) +
+  geom_histogram() +
+  facet_wrap(~ Contaminant)
+```
+
+```{r}
+ggplot(cali, aes(x=AnalyticalResultValue)) +
+  geom_histogram() +
+  facet_wrap(~ Contaminant)
+
+cali %>% 
+  filter()
+```
+
+```{r}
+manganese_unsafe_levels <- CAtest %>% 
+  filter(!is.na(AnalyticalResultValue)) %>% 
+  select(PWSID, PWSName, Contaminant, CollectionDate, AnalyticalResultValue) %>% 
+  filter(Contaminant == "manganese" & AnalyticalResultValue > 300)
+
+extant <- CAtest %>% 
+  filter(!is.na(AnalyticalResultValue)) # %>% ## after filtering CA data for those with contaminant value levels
+  # group_by(Contaminant) %>% 
+  # summarize(n = n())
+
+
+contams <- as.data.frame(unique(CAtest$Contaminant))
+safety_thresh <- c(300, 60, .06, NA, )
+
+contams_counties <- extant %>% 
+  select(PWSID, PWSName, Contaminant, CollectionDate, AnalyticalResultValue) %>% 
+  left_join(ws_counties, by = c("PWSID" = "Water.System.ID")) %>% 
+  filter(!is.na(City.s..Served))
+  
+```
+
+So if I have shapefiles for census tracts and for public water systems, and I have demographics for the census tracts, I can accumulate demographics by PWS:
+
+```{r}
+ca_income <- get_acs(
+  geography = "tract", 
+  variables = "B19013_001",
+  state = "CA", 
+  year = 2020,
+  geometry = TRUE
+)
+
+ggplot(data = ca_income, aes(fill = estimate)) + 
+  geom_sf(color = NA) # https://stackoverflow.com/questions/25875877/remove-border-lines-in-ggplot-map-choropleth
+
+```
+
+```{r}
+test <- get_decennial(
+  geography = "tract", 
+  variables = "P005003",
+  state = "CA", 
+  geometry = TRUE,
+  cache_table = TRUE
+)
+
+test2 <- get_decennial(
+  geography = "tract", 
+  variables = "P005002",
+  state = "CA", 
+  geometry = TRUE,
+  cache_table = TRUE
+)
+```
+
+```{r}
+ggplot(data = test, aes(fill = value)) + 
+  geom_sf(color = NA) # https://stackoverflow.com/questions/25875877/remove-border-lines-in-ggplot-map-choropleth
+```
+
+At the present moment I'm trying to figure out which variables will allow the code to run. It kinda sucks.
+
+```{r}
+watershapes <- st_read("C:/Users/AudreyS/Desktop/EJ/ej proj/temm.gpkg") %>% # https://community.rstudio.com/t/how-to-open-a-geopackage-file/41027
+  filter(state_code == "CA")
+
+watershapes <- watershapes %>% 
+  filter(tier == 1 | tier == 2) 
+
+```
+
+```{r}
+# for your sanity and overall well-being, please read the documentation: https://walker-data.com/tidycensus/articles/basic-usage.html 
+
+v17 <- load_variables(2020, "pl", cache = TRUE)
+
+View(v17)
+
+test2 <- get_decennial(
+  geography = "block group", 
+  variables = "P1_002N",
+  state = "CA", 
+  year = 2020,
+  geometry = TRUE,
+  cache_table = TRUE
+)
+
+test3 <- get_decennial(
+  geography = "block group", 
+  variables = "P1_001N",
+  state = "CA", 
+  year = 2020,
+  geometry = TRUE,
+  cache_table = TRUE
+)
+test4 <- get_decennial(
+  geography = "block group", 
+  variables = "P1_009N",
+  state = "CA", 
+  year = 2020,
+  geometry = TRUE,
+  cache_table = TRUE
+)
+
+# i think "total population of one group" excludes multiracial
+# the above thought appears to be true because multiracial = full total - total of one pop
+```
+
+```{r}
+ggplot() + 
+  geom_sf(data = test2, aes(fill = value), color = NA) +
+  geom_sf(data = watershapes, color = "white", fill = NA) +
+  scale_x_continuous(limits = c(-114, -125)) + 
+  scale_y_continuous(limits = c(32, 43))
+
+  # +
+  # scale_x_continuous(limits = c(-120, -124)) + 
+  # scale_y_continuous(limits = c(36, 40))
+```
+
+```{r}
+multirac_shapes <- get_acs(
+  geography = "block group", 
+  variables = "B02012_001",
+  state = "CA", 
+  year = 2020,
+  cache_table = TRUE,
+  geometry = TRUE
+) 
+
+```
+
+get_acs() returns both estimates and error margins
+
+moe = margin of error, default at 90% -- can be specified with moe_level in get_acs()\_\_
+
+Vars
+
+-   Race total: [B02001_001](https://api.census.gov/data/2020/acs/acs5/variables/B02001_001E.json)
+-   White alone [B02001_002](https://api.census.gov/data/2020/acs/acs5/variables/B02001_002E.json)
+-   [B02009_001](https://api.census.gov/data/2020/acs/acs5/variables/B02009_001E.json) Black alone or in combination
+-   B02010_001 Native American alone or in combination
+-   B02011_001 Asian alone or in combination
+-   B02012_001 Native Hawaiian or Pacific Islander alone or in combination
+-   [B19013_001](https://api.census.gov/data/2020/acs/acs5/variables/B19013_001E.json) median household income
+-   Hispanic total: B03003_001
+-   [B03003_003](https://api.census.gov/data/2020/acs/acs5/variables/B03003_003E.json) yes hispanic or latino
+
+Intersecting PWS w block groups
+
+```{r}
+watershapes <- st_transform(watershapes, 4269)
+multirac_shapes <- st_transform(multirac_shapes, 4269)
+
+water_blockgrps_intersection <- st_intersects(watershapes$geom, multirac_shapes$geometry)
+
+ggplot(data = watershapes) +
+  geom_sf()
+ggplot(data = multirac_shapes) + 
+  geom_sf()
+```
+
+In the process of figuring out which water systems serve which block groups
+
+```{r}
+class(watershapes)
+class(multirac_shapes)
+
+# casts from sf to sfc object because st_intersects needs sf only
+# watershapes$geom2 <- watershapes$geom %>% 
+#   st_sf() %>% 
+#   st_cast()
+# 
+# watershapes$geom3 <- watershapes$geom %>% 
+#   st_sf()
+# 
+# multirac_shapes$geometry2 <- multirac_shapes$geometry %>% 
+#   st_sf() %>% 
+#   st_cast()
+# NOT NEEDED ANYMORE because I should've used the whole df instead of the col
+
+# class(watershapes$geom2)
+# class(multirac_shapes$geometry2)
+
+jointowater <- st_join(watershapes, multirac_shapes)
+
+x1<-060910100000:060910100010 %>% 
+  as.character() %>% 
+  paste("0", ., sep = "")
+
+
+ggplot() +
+  geom_sf(data = multirac_shapes %>% filter(GEOID %in% x1)) +
+  geom_sf(data = watershapes %>% filter(pwsid == "CA4600018"), aes(fill = "blue"))
+
+```
+
+```{r}
+ggplot() +
+  geom_sf(data = multirac_shapes, fill = NA, color = "red") +
+  geom_sf(data = watershapes, fill = NA, color = "green") +
+  scale_x_continuous(limits = c(-114, -125)) + 
+  scale_y_continuous(limits = c(32, 43))
+```
+
+```{r}
+
+# https://api.census.gov/data/2020/dec/pl/variables.html
+block_shapes <- get_decennial(
+  geography = "block", 
+  variable = "H1_001N",
+  state = "CA", 
+  year = 2020,
+  cache_table = TRUE,
+  geometry = TRUE
+) 
+
+ggplot(block_shapes) +
+  geom_sf(fill = "black")
+
+
+joinblockstowater <- st_join(watershapes, block_shapes)
+```
+
+I want to check
+
+```{r}
+joincontamswater <- watershapes %>% 
+  left_join(contamsCA, by = c("pwsid" = "PWSID"))
+
+length(unique(contamsCA$PWSID))
+length(unique(joincontamswater$pwsid))
+length(unique(watershapes$pwsid))
+
+
+```
+
+COMPARE WATER DATA W CALIFORNIA WATER DATA (no can do, buckaroo)
