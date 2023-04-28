@@ -7,7 +7,55 @@ editor: visual
 ## Contaminants
 
 ```{r}
-allUCMR <- read.csv("UCMR4_All.csv")
+UCMRall <- read.csv("data/UCMR4_All.csv")
+UCMRbystate <- read.csv("data/UCMR4_All_Tribes_AK_LA.csv", fileEncoding = "UTF-8")
+```
+
+```{r}
+
+PWSs_state9 <- allUCMR %>% 
+  filter(State == "9") %>% 
+  select(PWSName) %>% 
+  unique()
+
+UCMR_CA_indig <- UCMRall %>% 
+  filter(PWSName %in% c("Pala North", "Pauma", "Pechanga", "Redding Rancheria", 
+                        "Viejas Community System") | State == "CA")
+
+UCMR_CA_indig %>% 
+  filter(is.na(AnalyticalResultValue.µg.L.) & AnalyticalResultsSign != "<")
+
+UCMR_CA_indig %>% 
+ # filter(!is.na(AnalyticalResultValue.microg.L.)) %>% 
+  group_by(Contaminant) %>% 
+  summarize(count = n())
+```
+
+It appears that all instances of NAs are as a result of the measurement being less than the minimum reporting level.
+
+```{r}
+UCMR_CA_indig <- UCMRbystate %>% 
+  filter(PWSName %in% c("Pala North", "Pauma", "Pechanga", "Redding Rancheria", 
+                        "Viejas Community System") | State == "CA")
+UCMR_CA_indig2 <- allUCMR %>% 
+  filter(PWSName %in% c("Pala North", "Pauma", "Pechanga", "Redding Rancheria", 
+                        "Viejas Community System") | State == "CA") 
+
+allUCMR %>% 
+  filter(PWSName %in% c("Pala North", "Pauma", "Pechanga", "Redding Rancheria", 
+                        "Viejas Community System") | State == "CA") %>% 
+  group_by(Contaminant) %>% 
+  summarise(count = n())
+
+## TRYING TO ID DISCREPANCIES BETWEEN BULK AND HALF
+
+anti_join(UCMR_CA_indig2, UCMR_CA_indig, by = c("PWSID", "Contaminant"))
+
+anti_join(UCMR_CA_indig, UCMR_CA_indig2, by = c("PWSID", "Contaminant"))
+
+UCMR_CA_indig2 %>% 
+  filter(PWSID == "CA1910005")
+
 ```
 
 ```{r}
@@ -20,7 +68,6 @@ options(tigris_use_cache = TRUE)
 library(tidyr)
 library(purrr)
 ```
-
 
 ```{r}
 # Checking which state has the most non-zero measurement values to work with
@@ -91,7 +138,6 @@ UCMR_CA <- allUCMR %>%
   filter(State == "CA")
 ```
 
-
 ```{r}
 bg_shapes <- get_acs(
   geography = "block", 
@@ -107,8 +153,6 @@ bg_shapes <- get_acs(
 
 ```
 
-
-
 ```{r}
 block_shapes <- get_decennial(
   geography = "block", 
@@ -120,20 +164,18 @@ block_shapes <- get_decennial(
   geometry = TRUE
 ) 
 ```
-Note: 2020 decennial Census data use differential privacy, a technique that
-introduces errors into data to preserve respondent confidentiality.
-ℹ Small counts should be interpreted with caution.
-ℹ See https://www.census.gov/library/fact-sheets/2021/protecting-the-confidentiality-of-the-2020-census-redistricting-data.html for additional guidance.
 
-Total P3_002N	
-White P3_003N	
-Black P3_004N	
-Indigenous P3_005N	
-Asian P3_006N	
-Paci_Isl P3_007N	
-Other P3_008N 
-Total_hisp P4_001N	
-Hisp_Lat P4_002N	
+Note: 2020 decennial Census data use differential privacy, a technique that introduces errors into data to preserve respondent confidentiality. ℹ Small counts should be interpreted with caution. ℹ See https://www.census.gov/library/fact-sheets/2021/protecting-the-confidentiality-of-the-2020-census-redistricting-data.html for additional guidance.
+
+Total P3_002N\
+White P3_003N\
+Black P3_004N\
+Indigenous P3_005N\
+Asian P3_006N\
+Paci_Isl P3_007N\
+Other P3_008N Total_hisp P4_001N\
+Hisp_Lat P4_002N
+
 ```{r}
 block_shapes <- block_shapes_tall %>% 
   pivot_wider(names_from = "variable", values_from = "value") %>% 
@@ -169,18 +211,9 @@ block_shapes_vals <- block_shapes %>%
 ggplot(block_shapes_vals, aes(Total)) + geom_histogram() + scale_x_log10()
 ```
 
-
 Vars
 
-Race total: B02001_001
-White alone B02001_002
-B02009_001 Black alone or in combination
-B02010_001 Native American alone or in combination
-B02011_001 Asian alone or in combination
-B02012_001 Native Hawaiian or Pacific Islander alone or in combination
-B19013_001 median household income
-Hispanic total: B03003_001
-B03003_003 yes hispanic or latino
+Race total: B02001_001 White alone B02001_002 B02009_001 Black alone or in combination B02010_001 Native American alone or in combination B02011_001 Asian alone or in combination B02012_001 Native Hawaiian or Pacific Islander alone or in combination B19013_001 median household income Hispanic total: B03003_001 B03003_003 yes hispanic or latino
 
 ```{r}
 bg_shapes <- st_transform(bg_shapes, 4269) # make types compatible
@@ -201,10 +234,8 @@ joinTo <- join %>%
   group_by(pwsid) %>% 
   mutate(weight = area / sum(area)) %>% 
   #--- calculate area-weighted corn acreage by HUC unit ---#
-  summarize(aw_acres = sum(weight * acres))
+  summarize(aw_acres = sum(weight * acres)) 
 
 ```
 
-
-Create bool for yes, all present
-Create categorical for "predominantly ___ population"
+Create bool for yes, all present Create categorical for "predominantly \_\_\_ population"
