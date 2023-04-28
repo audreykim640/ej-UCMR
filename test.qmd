@@ -115,7 +115,7 @@ ggplot(data = test, aes(fill = value)) +
   geom_sf(color = NA) # https://stackoverflow.com/questions/25875877/remove-border-lines-in-ggplot-map-choropleth
 ```
 
-At the present moment I'm trying to figure out which variables will allow the code to run. It kinda sucks.
+At the present moment I'm trying to figure out which variables will allow the code to run. (Note: I ended up finding things from ([Census Data API: /data/2020/dec/pl/variables](https://api.census.gov/data/2020/dec/pl/variables.html))
 
 ```{r}
 watershapes <- st_read("C:/Users/AudreyS/Desktop/EJ/ej proj/temm.gpkg") %>% # https://community.rstudio.com/t/how-to-open-a-geopackage-file/41027
