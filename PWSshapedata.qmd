@@ -1,0 +1,120 @@
+---
+title: "Comparing PWS shape data"
+format: html
+editor: visual
+---
+
+## PWS Shape Data
+
+```{r}
+library(dplyr)
+library(ggplot2)
+# install.packages("sf") # https://github.com/r-spatial/sf/issues/2035
+library(sf)
+library(tidycensus)
+options(tigris_use_cache = TRUE)
+library(tidyr)
+library(purrr)
+```
+
+```{r}
+watershapes <- st_read("data/temm.gpkg") # https://community.rstudio.com/t/how-to-open-a-geopackage-file/41027
+
+```
+
+```{r}
+govwatershapes <- st_read("data/SABL_Public_230403") %>% 
+  st_transform(4269) %>% 
+  rename("PWSID" = "SABL_PWSID")
+
+```
+
+```{r}
+
+ggplot(data = watershapes) +
+  geom_sf() +
+  scale_x_continuous(limits = c(-114, -125)) + 
+  scale_y_continuous(limits = c(32, 43))
+
+
+ggplot(data = govwatershapes %>% filter(VERIFIED_S == "Verified")) +
+  geom_sf()
+
+govwatershapes %>% 
+  st_drop_geometry() %>% 
+  group_by(VERIFIED_S) %>% 
+  summarise(Number = n())
+watershapes %>%
+  st_drop_geometry() %>% 
+  group_by(tier) %>% 
+  summarise(Number = n())
+```
+
+Next step: find data of indigenous people's land and join to govwatershapes
+
+-   Write about it in methods
+
+Next next step: wrangling demographic data. Reference methods section for this
+
+You got this, Audrey!!!
+
+```{r}
+UCMRIndigCodes <- UCMRall %>% 
+  filter(PWSName %in% c("Pala North", "Pauma", "Pechanga", "Redding Rancheria", 
+                        "Viejas Community System")) %>% 
+  select(PWSID) %>% 
+  unique() %>% 
+  pull() %>% 
+  map(function (x) { paste0("0", x)})
+
+indigwatershapes <- watershapes %>% 
+  filter(pwsid %in% UCMRIndigCodes) %>% 
+  rename("PWSID" = "pwsid",
+         "WATER_SY_1" = "pws_name",
+         "geometry" = "geom") %>% 
+  select(PWSID, WATER_SY_1, geometry) %>% 
+  st_transform(4269)
+
+CAwatershapes <- bind_rows(indigwatershapes, govwatershapes)
+
+```
+
+```{r}
+# Joining UCMR data with 
+UCMRshapes_inner <- CAwatershapes   %>% 
+  inner_join(UCMR_CA_indig) %>% 
+  select(PWSID, PWSName, FacilityWaterType, Contaminant, 
+         AnalyticalResultsSign, AnalyticalResultValue.µg.L., State, geometry) %>% 
+  rename("ContamLevel" = "AnalyticalResultValue.µg.L.")
+
+UCMRshapes_left <- UCMR_CA_indig %>% 
+  left_join(CAwatershapes) %>% 
+  select(PWSID, PWSName, FacilityWaterType, Contaminant, 
+         AnalyticalResultsSign, AnalyticalResultValue.µg.L., State, geometry) %>% 
+  rename("ContamLevel" = "AnalyticalResultValue.µg.L.")
+
+setdiff(UCMRshapes_left %>% select(PWSID) %>% st_drop_geometry() %>% unique() %>% pull(), 
+        UCMRshapes_inner %>% select(PWSID) %>% st_drop_geometry() %>% unique() %>% pull())
+
+UCMRshapes_left %>% 
+  st_is_empty()
+
+ggplot(UCMRshapes_inner %>% select(geometry) %>% unique()) +
+  geom_sf()
+
+UCMR_CA_indig %>% select(PWSID) %>% unique()
+UCMRshapes_left %>% select(PWSID) %>% st_drop_geometry() %>% unique() %>% pull() %>% length()
+
+
+```
+
+We henceforth use UCMRshapes_inner
+
+Now I think we're joining UCMRshapes_inner with demographic data
+
+First we load demographic data
+
+```{r}
+
+
+```
