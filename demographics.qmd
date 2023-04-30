@@ -15,7 +15,7 @@ library(tidycensus)
 options(tigris_use_cache = TRUE)
 library(tidyr)
 library(purrr)
-
+library(lwgeom)
 ```
 
 
@@ -30,6 +30,8 @@ bg_shapes <- get_acs(
   geometry = TRUE
 ) 
 
+govwatershapes <- st_read("data/SABL_Public_230403") %>% 
+  rename("PWSID" = "SABL_PWSID")
 ```
 
 Race total: B02001_001 
@@ -52,13 +54,16 @@ bg_shapes_wide <- bg_shapes %>%
         Asian = B02011_001,
         Total_Hisp = B03003_001,	
         Hisp_Lat = B03003_003,
-        Med_Income = B19013_001) %>% 
-  mutate(White = White / Total,
-         Black = Black / Total,
-         Indigenous = Indigenous / Total,
-         Asian = Asian / Total,
-         Hisp_Lat = Hisp_Lat / Total_Hisp
-         )
+        Med_Income = B19013_001) #%>% 
+  # mutate(White = White / Total,
+  #        Black = Black / Total,
+  #        Indigenous = Indigenous / Total,
+  #        Asian = Asian / Total,
+  #        Hisp_Lat = Hisp_Lat / Total_Hisp
+  #        )
+
+  # Save until after having joined since weighted averages won't work with props
+  # Want to use counts
 
 # block_shapes_tall_props <- block_shapes_wide %>% 
 #   pivot_longer(c(White, Black, Asian, Indigenous, Hisp_Lat), 
@@ -70,34 +75,50 @@ bg_shapes_wide <- bg_shapes %>%
 #   filter(!(Total == 0 & Total_Hisp == 0))
 ```
 
-```{r}
-ggplot(block_shapes_vals, aes(Total)) + geom_histogram() + scale_x_log10()
-```
-
-Vars
-
 
 ```{r}
-bg_shapes <- st_transform(bg_shapes, 4269) # make types compatible
-watershapes <- st_transform(watershapes, 4269)
+# below lines sourced from https://github.com/r-spatial/sf/issues/493
+sf_use_s2(FALSE) # flattens shapes
+bg_shapes_wide <- st_transform(bg_shapes_wide, 4269) %>% 
+  st_make_valid() # make types compatible
+govwatershapes <- st_transform(govwatershapes, 4269) %>% 
+  st_make_valid()
 
-join <- watershapes %>% 
-  inner_join(UCMR_CA, by = c("pwsid" = "PWSID")) %>% 
-  select(pwsid, PWSName, primacy_agency_code, primary_source_code, tier, FacilityWaterType, 
-         CollectionDate, Contaminant, MRL, AnalyticalResultsSign, AnalyticalResultValue.µg.L.) %>% 
-  st_intersection(bg_shapes) %>% 
-  mutate(pwi_county = paste0(pwsid, "-", GEOID))
+# join <- watershapes %>% 
+#   inner_join(UCMR_CA, by = c("pwsid" = "PWSID")) %>% 
+#   select(pwsid, PWSName, primacy_agency_code, primary_source_code, tier, FacilityWaterType, CollectionDate, Contaminant, MRL, AnalyticalResultsSign, AnalyticalResultValue.µg.L.) %>% 
+#   st_intersection(bg_shapes) %>% 
+#   mutate(pwi_county = paste0(pwsid, "-", GEOID))
 
 
-joinTo <- join %>% 
+# PWS_demos_joined <- st_join(govwatershapes, bg_shapes_wide)
+
+shape_intersections <- st_intersection(govwatershapes, bg_shapes_wide) %>% 
+  mutate(PWS_bg = paste0(PWSID, "-", GEOID))
+
+
+PWS_aw_demographics <- shape_intersections %>% 
   #--- get area ---#
   mutate(area = as.numeric(st_area(.))) %>% 
   #--- get area-weight by HUC unit ---#
-  group_by(pwsid) %>% 
+  group_by(PWSID) %>% 
   mutate(weight = area / sum(area)) %>% 
   #--- calculate area-weighted corn acreage by HUC unit ---#
-  summarize(aw_acres = sum(weight * acres)) 
+  # 'aw' stands for area-weighted 
+  summarize(Total_aw = sum(weight * Total),
+            White_aw = sum(weight * White),
+            Black_aw = sum(weight * Black),
+            Indig_aw = sum(weight * Indigenous),
+            Asian_aw = sum(weight * Asian),
+            Total_HispLat_aw = sum(weight * Total_Hisp),
+            HispLat_aw = sum(weight * Hisp_Lat),
+            MedIncome_aw = sum(weight * Med_Income),
+            )
 
+# saving for posterity (to not have to rerun code)
+st_write(PWS_aw_demographics, dsn = 'data/joinedPWSdemos/joinedPWSdemos.shp')
+
+test <- st_read("data/joinedPWSdemos")
 ```
 
 Create bool for yes, all present Create categorical for "predominantly \_\_\_ population"
