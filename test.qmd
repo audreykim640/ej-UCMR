@@ -17,7 +17,7 @@ Topics of discussion:
 Also include age? How are block groups formed? How are the blocks determined? When were they formed? Amendment --\> Vulnerable population disprop affected --\> taken into cost benefit analysis Clean Water act relation to data, where it sits in the regulation system? Why is this important?
 
 ```{r}
-allUCMR <- read.csv("UCMR4_All.csv")
+UCMRall <- read.csv("data/UCMR4_All.csv")
 ```
 
 ```{r}
@@ -30,9 +30,6 @@ options(tigris_use_cache = TRUE)
 ```
 
 ```{r}
-contamsCA <- allUCMR %>% 
-  filter(State == "CA") 
-
 looksee <- allUCMR %>% 
   group_by(State, Contaminant) %>% 
   summarize(count = n())

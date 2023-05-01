@@ -18,7 +18,7 @@ library(purrr)
 ```
 
 ```{r}
-watershapes <- st_read("data/temm.gpkg") # https://community.rstudio.com/t/how-to-open-a-geopackage-file/41027
+SLwatershapes <- st_read("data/temm.gpkg") # https://community.rstudio.com/t/how-to-open-a-geopackage-file/41027
 
 ```
 
@@ -59,29 +59,26 @@ Next next step: wrangling demographic data. Reference methods section for this
 You got this, Audrey!!!
 
 ```{r}
-UCMRIndigCodes <- UCMRall %>% 
-  filter(PWSName %in% c("Pala North", "Pauma", "Pechanga", "Redding Rancheria", 
-                        "Viejas Community System")) %>% 
-  select(PWSID) %>% 
-  unique() %>% 
-  pull() %>% 
-  map(function (x) { paste0("0", x)})
 
-indigwatershapes <- watershapes %>% 
-  filter(pwsid %in% UCMRIndigCodes) %>% 
-  rename("PWSID" = "pwsid",
-         "WATER_SY_1" = "pws_name",
-         "geometry" = "geom") %>% 
-  select(PWSID, WATER_SY_1, geometry) %>% 
-  st_transform(4269)
 
-CAwatershapes <- bind_rows(indigwatershapes, govwatershapes)
+# CAtest <- watershapes %>% 
+#   filter(pwsid %in% unique(UCMR_CA_indig$PWSID)) %>% 
+#   rename("PWSID" = "pwsid",
+#          "WATER_SY_1" = "pws_name",
+#          "geometry" = "geom") %>% 
+#   select(PWSID, WATER_SY_1, geometry) %>% 
+#   st_transform(4269)
+
+
+
+SLwatershapes %>% 
+  filter(UCMR_CA_indig)
 
 ```
 
 ```{r}
 # Joining UCMR data with 
-UCMRshapes_inner <- CAwatershapes   %>% 
+UCMRshapes_inner <- CAwatershapes %>% 
   inner_join(UCMR_CA_indig) %>% 
   select(PWSID, PWSName, FacilityWaterType, Contaminant, 
          AnalyticalResultsSign, AnalyticalResultValue.µg.L., State, geometry) %>% 
@@ -105,14 +102,15 @@ ggplot(UCMRshapes_inner %>% select(geometry) %>% unique()) +
 UCMR_CA_indig %>% select(PWSID) %>% unique()
 UCMRshapes_left %>% select(PWSID) %>% st_drop_geometry() %>% unique() %>% pull() %>% length()
 
-
 ```
 
 We henceforth use UCMRshapes_inner
 
 Now I think we're joining UCMRshapes_inner with demographic data
 
-First we load demographic data
+First we load demographic data\\
+
+\*record scratch\* I think since there are so many rows from contaminants, I should join by water shape and demographics first and THEN join those to contaminants. At least now I know about the contaminants deal.
 
 ```{r}
 
