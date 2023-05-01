@@ -4,9 +4,9 @@ format: html
 editor: visual
 ---
 
-## Demographics
+## This is my project
 
-```{r loading packages}
+```{r loading packages, echo=F, warning=F}
 library(dplyr)
 library(ggplot2)
 # install.packages("sf") # https://github.com/r-spatial/sf/issues/2035
@@ -17,9 +17,13 @@ library(tidyr)
 library(purrr)
 library(lwgeom)
 library(stringr)
+library(moderndive)
+# devtools::install_github(“rstudio/gt”)
+library(knitr)
+library(kableExtra)
 ```
 
-```{r loading data}
+```{r loading data, warning=F, message=F}
 
 # variables from https://api.census.gov/data/2020/acs/acs5/groups.html
 bg_shapes <- get_acs(
@@ -49,7 +53,7 @@ SLwatershapes <- st_read("data/temm.gpkg") %>%
 
 ```
 
-```{r supplementing PWS data}
+```{r supplementing PWS data, warning=F, message=F}
 missingPWSs <- setdiff(unique(UCMR$PWSID), unique(govwatershapes$PWSID)) %>% 
   map(function (x) {ifelse(substr(x,1,1) == "9", paste0("0", x), x)}) 
 
@@ -67,7 +71,7 @@ PWS <- bind_rows(missingshapes, govwatershapes)
 B02001_001 Race total B02001_002 White alone\
 B02009_001 Black alone or in combination B02010_001 Native American alone or in combination B02011_001 Asian alone or in combination B19013_001 median household income Hispanic total: B03003_001 B03003_003 yes hispanic or latino
 
-```{r transforming demographics}
+```{r transforming demographics, echo=F, warning=F, message=F}
 bg_shapes_wide <- bg_shapes %>% 
   select(-moe) %>% 
   pivot_wider(names_from = "variable", values_from = "estimate") %>% 
@@ -99,7 +103,7 @@ bg_shapes_wide <- bg_shapes %>%
 #   filter(!(Total == 0 & Total_Hisp == 0))
 ```
 
-```{r joining and avging demographics, warning = FALSE}
+```{r joining and avging demographics, echo=F, warning=F, message=F}
 # below lines sourced from https://github.com/r-spatial/sf/issues/493
 sf_use_s2(FALSE) # flattens shapes
 
@@ -135,13 +139,10 @@ PWS_aw_demographics <- shape_intersections %>%
             )
 
 # saving for posterity (to not have to rerun code)
-st_write(PWS_aw_demographics, dsn = 'data/joinedPWSdemos/joinedPWSdemos.shp')
-
+# st_write(PWS_aw_demographics, dsn = 'data/joinedPWSdemos/joinedPWSdemos.shp')
 ```
 
-Create bool for yes, all present Create categorical for "predominantly \_\_\_ population"
-
-```{r wrangling demographics}
+```{r wrangling demographics, echo=F, warning=F, message=F}
 PWSdemog <- PWS_aw_demographics %>% 
   mutate(White_prop = White_aw / Total_aw,
             Black_prop = Black_aw / Total_aw,
@@ -158,7 +159,7 @@ PWSdemog <- PWSdemog %>%
          Indig_prop, Asian_prop, HispLat_prop, Predom)
 ```
 
-```{r full data set (joining w UCMR)}
+```{r full data set (joining w UCMR), echo=F, warning=F, message=F}
 contamsOfInterest <- c("germanium", "manganese", "HAA6Br", "HAA9")
 
 full <- UCMR %>% 
@@ -173,25 +174,71 @@ full <- UCMR %>%
   rename(ContamLevel = AnalyticalResultValue.µg.L.,
          RelativetoMRL = AnalyticalResultsSign,
          MedIncome = MedIncome_aw)
-
-st_write(full, dsn = 'data/PWS_contam_demog/PWS_contam_demog.shp')
 ```
 
-```{r}
+## Contaminants vs Races/Ethnicities
+
+### Plotting
+
+```{r plotting contams and race/eth, echo=F, warning=F, message=F}
 ggplot(full, aes(x = Prop, y = ContamLevel)) +
-  geom_point(alpha = 0.1) +
-  geom_smooth(se = FALSE, formula = y~x) +
-  facet_grid(Contaminant ~ RaceEth) +
-  scale_y_log10()
-
+  geom_point(alpha = 0.08) +
+  geom_smooth(se = FALSE, formula = y~x, color = "goldenrod") +
+  facet_grid(Contaminant ~ RaceEth, switch = "both") +
+  scale_y_log10() +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = -90, vjust = 0.4))
 ```
+
+### Regressions
+
+In the following analyses, I am mainly testing for the following hypotheses: 
+
+- Null hypothesis: The relationship between the amount of germanium in the water and proportion of race will NOT depend on (change with) the race.
+- Alternative hypothesis: The relationship between the amount of germanium in the water and proportion of race WILL depend on (change with) the race.
+
+#### Germanium levels vs Race/ethnicity served by PWS proportions 
 
 ```{r}
 germanium <- full %>% 
   filter(Contaminant == "germanium")
-  
 
-lm(ContamLevel ~ Prop * RaceEth, data = germanium)
+germanium_model <- lm(ContamLevel ~ Prop * RaceEth, data = germanium)
+get_regression_table(germanium_model) # %>% 
+  # kable() %>%
+  # kable_minimal()
+```
+
+The baseline in this model is the proportion of Asian respondents, which observes a staistically significant (p-value $\approx$ 0) negative correlation with the level of germanium. According to this model for each each percent increase of Asian respondents, we would expect to observe, on average, the concentration of germanium in the water decrease by approximately 0.040 $\mu$g/mL. While the p-value is negligible, we cannot say that it equals zerol it is only very close.
+
+For germanium, there appears to be sufficient evidence to reject the null hypothesis that the race does not have an impact on the relationship between proportion of race and concentration of the contaminant. Both white and Hispanic/Latino populations experience an increase in germanium concentration in water as the proportion of those races increase. 
+
+For each percent increase in the proportion of people that the water system being Hispanic/Latino, we would expect to observe, on average, the concentration of germanium in the water *increase* by (-4.016 + 5.688 $\approx$ ) 0.017 $\mu$g/mL. The rate of increase becomes (-4.016 + 5.999 $\approx$ ) 0.020 $\mu$g/mL for each percent increase in the proportion of served people being white.
+
+The relationship between the proportions of Black and Indigenous populations and contaminant levels visually seems to observe a similar pattern demostrated by Asian populations. Statistically, there is no evidence that there is difference in either slope or intercept for these three groups.
+
+```{r}
+manganese <- full %>% 
+  filter(Contaminant == "manganese")
+  
+manganese_model <- lm(ContamLevel ~ Prop * RaceEth, data = manganese)
+get_regression_table(manganese_model)
+```
+
+```{r}
+HAA6Br <- full %>% 
+  filter(Contaminant == "HAA6Br")
+  
+HAA6Br_model <- lm(ContamLevel ~ Prop * RaceEth, data = HAA6Br)
+get_regression_table(HAA6Br_model)
+```
+
+```{r}
+HAA9 <- full %>% 
+  filter(Contaminant == "HAA9")
+  
+HAA9_model <- lm(ContamLevel ~ Prop * RaceEth, data = HAA9)
+get_regression_table(HAA9_model)
 ```
 
 ```{r}
