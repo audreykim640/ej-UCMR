@@ -6,7 +6,7 @@ editor: visual
 
 ## Demographics
 
-```{r}
+```{r loading packages}
 library(dplyr)
 library(ggplot2)
 # install.packages("sf") # https://github.com/r-spatial/sf/issues/2035
@@ -16,13 +16,15 @@ options(tigris_use_cache = TRUE)
 library(tidyr)
 library(purrr)
 library(lwgeom)
+library(stringr)
 ```
 
+```{r loading data}
 
-```{r}
+# variables from https://api.census.gov/data/2020/acs/acs5/groups.html
 bg_shapes <- get_acs(
   geography = "block group", 
-  variables = c("B02001_001", "B02001_002", "B02009_001", "B02010_001", 
+  variables = c("B02001_001", "B02008_001", "B02009_001", "B02010_001", 
                 "B02011_001", "B19013_001", "B03003_001", "B03003_003"),
   state = "CA", 
   year = 2020,
@@ -30,25 +32,47 @@ bg_shapes <- get_acs(
   geometry = TRUE
 ) 
 
+# CSV is too large to push -- download from https://www.epa.gov/dwucmr/occurrence-data-unregulated-contaminant-monitoring-rule#4
+UCMR <- read.csv("data/UCMR4_All.csv") %>% 
+  filter(PWSName %in% c("Pala North", "Pauma", "Pechanga", "Redding Rancheria", 
+                        "Viejas Community System") | State == "CA") 
+
 govwatershapes <- st_read("data/SABL_Public_230403") %>% 
-  rename("PWSID" = "SABL_PWSID")
+  rename("PWSID" = "SABL_PWSID") %>%
+  filter(PWSID %in% unique(UCMR$PWSID)) %>% 
+  st_transform(4269)
+
+# .gpkg is too large to push -- download from https://github.com/SimpleLab-Inc/wsb
+SLwatershapes <- st_read("data/temm.gpkg") %>% 
+  # https://community.rstudio.com/t/how-to-open-a-geopackage-file/41027
+  filter(pwsid %in% unique(UCMR$PWSID))
+
 ```
 
-Race total: B02001_001 
-White alone B02001_002 
-B02009_001 Black alone or in combination 
-B02010_001 Native American alone or in combination 
-B02011_001 Asian alone or in combination 
-B19013_001 median household income 
-Hispanic total: B03003_001 
-B03003_003 yes hispanic or latino
+```{r supplementing PWS data}
+missingPWSs <- setdiff(unique(UCMR$PWSID), unique(govwatershapes$PWSID)) %>% 
+  map(function (x) {ifelse(substr(x,1,1) == "9", paste0("0", x), x)}) 
 
-```{r}
+missingshapes <- SLwatershapes %>% 
+  filter(pwsid %in% missingPWSs) %>% 
+  rename("PWSID" = "pwsid",
+         "WATER_SY_1" = "pws_name",
+         "geometry" = "geom") %>% 
+  select(PWSID, WATER_SY_1, geometry) %>% 
+  st_transform(4269)
+
+PWS <- bind_rows(missingshapes, govwatershapes)
+```
+
+B02001_001 Race total B02001_002 White alone\
+B02009_001 Black alone or in combination B02010_001 Native American alone or in combination B02011_001 Asian alone or in combination B19013_001 median household income Hispanic total: B03003_001 B03003_003 yes hispanic or latino
+
+```{r transforming demographics}
 bg_shapes_wide <- bg_shapes %>% 
   select(-moe) %>% 
   pivot_wider(names_from = "variable", values_from = "estimate") %>% 
   rename(Total = B02001_001,	
-        White = B02001_002,	
+        White = B02008_001,	
         Black = B02009_001,
         Indigenous = B02010_001,	
         Asian = B02011_001,
@@ -75,14 +99,9 @@ bg_shapes_wide <- bg_shapes %>%
 #   filter(!(Total == 0 & Total_Hisp == 0))
 ```
 
-
-```{r}
+```{r joining and avging demographics, warning = FALSE}
 # below lines sourced from https://github.com/r-spatial/sf/issues/493
 sf_use_s2(FALSE) # flattens shapes
-bg_shapes_wide <- st_transform(bg_shapes_wide, 4269) %>% 
-  st_make_valid() # make types compatible
-govwatershapes <- st_transform(govwatershapes, 4269) %>% 
-  st_make_valid()
 
 # join <- watershapes %>% 
 #   inner_join(UCMR_CA, by = c("pwsid" = "PWSID")) %>% 
@@ -93,7 +112,7 @@ govwatershapes <- st_transform(govwatershapes, 4269) %>%
 
 # PWS_demos_joined <- st_join(govwatershapes, bg_shapes_wide)
 
-shape_intersections <- st_intersection(govwatershapes, bg_shapes_wide) %>% 
+shape_intersections <- st_intersection(PWS, bg_shapes_wide) %>% 
   mutate(PWS_bg = paste0(PWSID, "-", GEOID))
 
 
@@ -112,13 +131,80 @@ PWS_aw_demographics <- shape_intersections %>%
             Asian_aw = sum(weight * Asian),
             Total_HispLat_aw = sum(weight * Total_Hisp),
             HispLat_aw = sum(weight * Hisp_Lat),
-            MedIncome_aw = sum(weight * Med_Income),
+            MedIncome_aw = sum(weight * Med_Income)
             )
 
 # saving for posterity (to not have to rerun code)
 st_write(PWS_aw_demographics, dsn = 'data/joinedPWSdemos/joinedPWSdemos.shp')
 
-test <- st_read("data/joinedPWSdemos")
 ```
 
 Create bool for yes, all present Create categorical for "predominantly \_\_\_ population"
+
+```{r wrangling demographics}
+PWSdemog <- PWS_aw_demographics %>% 
+  mutate(White_prop = White_aw / Total_aw,
+            Black_prop = Black_aw / Total_aw,
+            Indig_prop = Indig_aw / Total_aw,
+            Asian_prop = Asian_aw / Total_aw,
+            HispLat_prop = HispLat_aw / Total_HispLat_aw)
+
+PWSdemog <- PWSdemog %>% 
+  st_drop_geometry() %>% # max.col() couldn't work with 
+  mutate(Predom = colnames(.[10:14])[max.col(.[10:14])]) %>% 
+  # above line courtesy of https://stackoverflow.com/questions/17735859/for-each-row-return-the-column-name-of-the-largest-value
+  right_join(PWSdemog) %>% 
+  select(PWSID, MedIncome_aw, White_prop, Black_prop,
+         Indig_prop, Asian_prop, HispLat_prop, Predom)
+```
+
+```{r full data set (joining w UCMR)}
+contamsOfInterest <- c("germanium", "manganese", "HAA6Br", "HAA9")
+
+full <- UCMR %>% 
+  select(PWSID, PWSName, Contaminant, AnalyticalResultsSign,
+         AnalyticalResultValue.µg.L.) %>% 
+  filter(Contaminant %in% contamsOfInterest) %>% 
+  inner_join(PWSdemog) %>% 
+  pivot_longer(c(White_prop, Black_prop, Asian_prop, Indig_prop, HispLat_prop), 
+                names_to = "RaceEth", values_to = "Prop") %>% 
+  mutate(Predom = substr(Predom, 1, nchar(Predom)-5),
+         RaceEth = substr(RaceEth, 1, nchar(RaceEth)-5)) %>% 
+  rename(ContamLevel = AnalyticalResultValue.µg.L.,
+         RelativetoMRL = AnalyticalResultsSign,
+         MedIncome = MedIncome_aw)
+
+st_write(full, dsn = 'data/PWS_contam_demog/PWS_contam_demog.shp')
+```
+
+```{r}
+ggplot(full, aes(x = Prop, y = ContamLevel)) +
+  geom_point(alpha = 0.1) +
+  geom_smooth(se = FALSE, formula = y~x) +
+  facet_grid(Contaminant ~ RaceEth) +
+  scale_y_log10()
+
+```
+
+```{r}
+germanium <- full %>% 
+  filter(Contaminant == "germanium")
+  
+
+lm(ContamLevel ~ Prop * RaceEth, data = germanium)
+```
+
+```{r}
+ggplot(full %>% filter(ContamLevel != 0), aes(x = Prop, y = ContamLevel, color = Contaminant)) +
+  geom_point(alpha = 0.1) +
+  geom_smooth(se = FALSE, formula = y~x) +
+  scale_y_log10() +
+  facet_wrap(~ RaceEth)
+```
+
+```{r}
+ggplot(full, aes(x = Predom, y = ContamLevel)) +
+  geom_violin() +
+  scale_y_log10() +
+  facet_wrap(~ Contaminant)
+```
