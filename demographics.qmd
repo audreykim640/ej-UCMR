@@ -22,6 +22,7 @@ library(moderndive)
 library(knitr)
 library(kableExtra)
 library(ggfortify)
+library(performance)
 ```
 
 ```{r loading data, warning=F, message=F}
@@ -168,16 +169,16 @@ full <- UCMR %>%
          AnalyticalResultValue.µg.L.) %>% 
   filter(Contaminant %in% contamsOfInterest) %>% 
   inner_join(PWSdemog) %>% 
-  pivot_longer(c(White_prop, Black_prop, Asian_prop, Indig_prop, HispLat_prop), 
+  pivot_longer(c(White_prop, Black_prop, Asian_prop, Indig_prop), 
                 names_to = "RaceEth", values_to = "Prop") %>% 
-  mutate(Predom = substr(Predom, 1, nchar(Predom)-5),
-         RaceEth = substr(RaceEth, 1, nchar(RaceEth)-5),
-         RaceEth = as.factor(RaceEth)) %>% 
   rename(ContamLevel = AnalyticalResultValue.µg.L.,
          RelativetoMRL = AnalyticalResultsSign,
-         MedIncome = MedIncome_aw)
-
-# write.csv(full, "data/full.csv", row.names=FALSE)
+         MedIncome = MedIncome_aw) %>% 
+  mutate(Predom = substr(Predom, 1, nchar(Predom)-5),
+         RaceEth = substr(RaceEth, 1, nchar(RaceEth)-5),
+         RaceEth = factor(RaceEth),
+         Contaminant = factor(Contaminant, 
+                                 levels = c("HAA6Br", "HAA9", "manganese", "germanium"))) 
 ```
 
 ## Contaminants vs Races/Ethnicities
@@ -194,20 +195,30 @@ ggplot(full, aes(x = Prop, y = ContamLevel)) +
   theme(axis.text.x = element_text(angle = -90, vjust = 0.4))
 ```
 
+```{r plotting contams and income, echo=F, warning=F, message=F}
+ggplot(full, aes(x = MedIncome, y = ContamLevel)) +
+  geom_point(alpha = 0.08) +
+  geom_smooth(se = FALSE, formula = y~x, color = "goldenrod") +
+  facet_grid(~ Contaminant) +
+  scale_y_log10() +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = -90, vjust = 0.4))
+```
+
 ### Regressions
 
-In the following analyses, I am mainly testing for the following hypotheses:
+In the following analyses, I am mainly testing for the following hypotheses: 
 
--   Null hypothesis: The relationship between the amount of germanium in the water and proportion of race will NOT depend on (change with) the race.
--   Alternative hypothesis: The relationship between the amount of germanium in the water and proportion of race WILL depend on (change with) the race.
+- Null hypothesis: The relationship between the amount of germanium in the water and proportion of race will NOT depend on (change with) the race.
+- Alternative hypothesis: The relationship between the amount of germanium in the water and proportion of race WILL depend on (change with) the race.
 
-#### Germanium levels vs Race/ethnicity served by PWS proportions
+#### Germanium levels vs Race/ethnicity served by PWS proportions 
 
 ```{r}
 germanium <- full %>% 
   filter(Contaminant == "germanium")
 
-germanium_model <- lm(ContamLevel ~ Prop * RaceEth, data = germanium)
+germanium_model <- lm(ContamLevel ~ Prop_sq * RaceEth, data = germanium)
 get_regression_table(germanium_model) # %>% 
   # kable() %>%
   # kable_minimal()
@@ -236,19 +247,11 @@ ggplot(germ_residuals2, aes(sample = residual)) +
 
 The baseline in this model is the proportion of Asian respondents, which observes a staistically significant (p-value $\approx$ 0) negative correlation with the level of germanium. According to this model for each each percent increase of Asian respondents, we would expect to observe, on average, the concentration of germanium in the water decrease by approximately 0.040 $\mu$g/mL. While the p-value is negligible, we cannot say that it equals zerol it is only very close.
 
-For germanium, there appears to be sufficient evidence to reject the null hypothesis that the race does not have an impact on the relationship between proportion of race and concentration of the contaminant. Both white and Hispanic/Latino populations experience an increase in germanium concentration in water as the proportion of those races increase.
+For germanium, there appears to be sufficient evidence to reject the null hypothesis that the race does not have an impact on the relationship between proportion of race and concentration of the contaminant. Both white and Hispanic/Latino populations experience an increase in germanium concentration in water as the proportion of those races increase. 
 
 For each percent increase in the proportion of people that the water system being Hispanic/Latino, we would expect to observe, on average, the concentration of germanium in the water *increase* by (-4.016 + 5.688 $\approx$ ) 0.017 $\mu$g/mL. The rate of increase becomes (-4.016 + 5.999 $\approx$ ) 0.020 $\mu$g/mL for each percent increase in the proportion of served people being white.
 
 The relationship between the proportions of Black and Indigenous populations and contaminant levels visually seems to observe a similar pattern demostrated by Asian populations. Statistically, there is no evidence that there is difference in either slope or intercept for these three groups.
-
-```{r}
-germ_diags <- ls.diag(germanium_model) 
-
-germ_diags$std.res %>% 
-  sort(decreasing = TRUE) %>% 
-  head(20)
-```
 
 ```{r}
 manganese <- full %>% 
