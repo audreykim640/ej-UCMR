@@ -178,7 +178,8 @@ full <- UCMR %>%
          RaceEth = substr(RaceEth, 1, nchar(RaceEth)-5),
          RaceEth = factor(RaceEth),
          Contaminant = factor(Contaminant, 
-                                 levels = c("HAA6Br", "HAA9", "manganese", "germanium"))) 
+                                 levels = c("HAA6Br", "HAA9", "manganese", "germanium"))) %>% 
+  filter(ContamLevel != 0)
 ```
 
 ## Contaminants vs Races/Ethnicities
@@ -189,7 +190,7 @@ full <- UCMR %>%
 ggplot(full, aes(x = Prop, y = ContamLevel)) +
   geom_point(alpha = 0.08) +
   geom_smooth(se = FALSE, formula = y~x, color = "goldenrod") +
-  facet_grid(Contaminant ~ RaceEth, switch = "both") +
+  facet_grid(Contaminant ~ RaceEth, switch = "both", scale = "free") +
   scale_y_log10() +
   theme_classic() +
   theme(axis.text.x = element_text(angle = -90, vjust = 0.4))
@@ -197,10 +198,9 @@ ggplot(full, aes(x = Prop, y = ContamLevel)) +
 
 ```{r plotting contams and income, echo=F, warning=F, message=F}
 ggplot(full, aes(x = MedIncome, y = ContamLevel)) +
-  geom_point(alpha = 0.08) +
+  geom_point(alpha = 1) +
   geom_smooth(se = FALSE, formula = y~x, color = "goldenrod") +
-  facet_grid(~ Contaminant) +
-  scale_y_log10() +
+  facet_grid(~ Contaminant, scales = "free_y") +
   theme_classic() +
   theme(axis.text.x = element_text(angle = -90, vjust = 0.4))
 ```
@@ -218,7 +218,7 @@ In the following analyses, I am mainly testing for the following hypotheses:
 germanium <- full %>% 
   filter(Contaminant == "germanium")
 
-germanium_model <- lm(ContamLevel ~ Prop_sq * RaceEth, data = germanium)
+germanium_model <- lm(ContamLevel ~ Prop * RaceEth, data = germanium)
 get_regression_table(germanium_model) # %>% 
   # kable() %>%
   # kable_minimal()
@@ -230,11 +230,13 @@ germanium <- germanium %>%
 germanium_model2 <- lm(ContamLevel ~ Prop_sq * RaceEth, data = germanium)
 germ_residuals2 <- get_regression_points(germanium_model2)
 
-
-
-ggplot(germ_residuals2, aes(sample = residual)) +
+ggplot(germ_residuals, aes(sample = residual)) +
   geom_qq_line() +
   geom_qq() +
+  facet_wrap(~ RaceEth)
+
+ggplot(germ_residuals, aes(x = ContamLevel_hat, y = residual)) +
+  geom_point() +
   facet_wrap(~ RaceEth)
 # +
 #   geom_smooth(se = FALSE, formula = y~x, color = "goldenrod") +
@@ -295,3 +297,7 @@ ggplot(full, aes(x = Predom, y = ContamLevel)) +
   facet_wrap(~ Contaminant) +
   theme_bw()
 ```
+
+I'm trying to figure out which statistical tests are valid and what I should be using.
+Um check assuptions for ANOVA (violin) for means and see what can be done for linear
+regression. xx :)
