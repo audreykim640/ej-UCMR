@@ -1,0 +1,34 @@
+---
+title: "appendix"
+format: html
+editor: visual
+---
+
+## Appendix
+
+
+```{r loading packages, echo=F, warning=F}
+library(dplyr)
+library(ggplot2)
+library(performance)
+library(rcompanion)
+```
+
+#### Germanium
+
+##### Deciding model
+```{r}
+germanium_glm <- glm(ContamLevel ~ Prop * RaceEth, data = germanium, family = Gamma)
+germanium_log <- glm(LogLevel ~ Prop * RaceEth, data = germanium)
+
+rcompanion::compareGLM(germanium_glm, germanium_log)
+```
+Since smaller AIC 
+##### Checking assumptions
+
+```{r}
+plot(germanium_glm) # Gamma GLM
+plot(germanium_log) # log-transformed contaminant levels
+```
+
+
