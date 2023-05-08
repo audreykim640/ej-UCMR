@@ -14,6 +14,16 @@ library(performance)
 library(rcompanion)
 ```
 
+#### Original Visualization
+
+```{r plotting contams and race/eth, echo=F, warning=F, message=F}
+ggplot(full, aes(x = Prop, y = ContamLevel)) +
+  geom_point(alpha = 0.08) +
+  facet_grid(Contaminant ~ RaceEth, switch = "both", scale = "free") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = -90, vjust = 0.4))
+```
+
 #### Germanium
 
 ##### Deciding model
@@ -23,7 +33,8 @@ germanium_log <- glm(LogLevel ~ Prop * RaceEth, data = germanium)
 
 rcompanion::compareGLM(germanium_glm, germanium_log)
 ```
-Since smaller AIC 
+Since smaller AIC, BIC, p-value and larger McFadden are all evidence of a better fit, we choose the second model: log-transforming the response variable.
+
 ##### Checking assumptions
 
 ```{r}
@@ -32,3 +43,44 @@ plot(germanium_log) # log-transformed contaminant levels
 ```
 
 
+#### Manganese
+
+```{r}
+manganese_gamma <- glm(ContamLevel ~ Prop * RaceEth, data = manganese, family = Gamma)
+manganese_lm <- glm(ContamLevel ~ Prop * RaceEth, data = manganese)
+manganese_log <- glm(LogLevel ~ Prop * RaceEth, data = manganese)
+
+rcompanion::compareGLM(manganese_gamma, manganese_lm) # gamma wins!
+
+rcompanion::compareGLM(manganese_gamma, manganese_log) # log-adjusted y wins!
+
+plot(manganese_log)
+```
+
+#### HAA6Br
+
+```{r}
+HAA6Br_gamma <- glm(ContamLevel ~ Prop * RaceEth, data = HAA6Br, family = Gamma)
+HAA6Br_lm <- glm(ContamLevel ~ Prop * RaceEth, data = HAA6Br)
+HAA6Br_log <- glm(LogLevel ~ Prop * RaceEth, data = HAA6Br)
+
+rcompanion::compareGLM(HAA6Br_gamma, HAA6Br_lm) # gamma wins!
+
+rcompanion::compareGLM(HAA6Br_gamma, HAA6Br_log) # log-adjusted y wins!
+
+plot(HAA6Br_log)
+```
+
+#### HAA9
+
+```{r}
+HAA9_gamma <- glm(ContamLevel ~ Prop * RaceEth, data = HAA9, family = Gamma)
+HAA9_lm <- glm(ContamLevel ~ Prop * RaceEth, data = HAA9)
+HAA9_log <- glm(LogLevel ~ Prop * RaceEth, data = HAA9)
+
+rcompanion::compareGLM(HAA9_gamma, HAA9_lm) # gamma wins!
+
+rcompanion::compareGLM(HAA9_gamma, HAA9_log) # log-adjusted y wins!
+
+plot(HAA9_log)
+```

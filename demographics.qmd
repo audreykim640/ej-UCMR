@@ -154,7 +154,7 @@ PWSdemog <- PWS_aw_demographics %>%
 
 PWSdemog <- PWSdemog %>% 
   st_drop_geometry() %>% # max.col() couldn't work with 
-  mutate(Predom = colnames(.[10:14])[max.col(.[10:14])]) %>% 
+  mutate(Predom = colnames(.[10:13])[max.col(.[10:13])]) %>% 
   # above line courtesy of https://stackoverflow.com/questions/17735859/for-each-row-return-the-column-name-of-the-largest-value
   right_join(PWSdemog) %>% 
   select(PWSID, MedIncome_aw, White_prop, Black_prop,
@@ -174,12 +174,15 @@ full <- UCMR %>%
   rename(ContamLevel = AnalyticalResultValue.µg.L.,
          RelativetoMRL = AnalyticalResultsSign,
          MedIncome = MedIncome_aw) %>% 
+  filter(ContamLevel != 0) %>% 
   mutate(Predom = substr(Predom, 1, nchar(Predom)-5),
          RaceEth = substr(RaceEth, 1, nchar(RaceEth)-5),
          RaceEth = factor(RaceEth),
          Contaminant = factor(Contaminant, 
-                                 levels = c("HAA6Br", "HAA9", "manganese", "germanium"))) %>% 
-  filter(ContamLevel != 0)
+                                 levels = c("HAA6Br", "HAA9", "manganese", "germanium")),
+         LogLevel = log10(ContamLevel),
+         HLFiftyPer = ifelse(HispLat_prop >= median(HispLat_prop), "Above", "Below"),
+         HLFiftyPer = factor(HLFiftyPer, levels = c("Above", "Below"))) 
 ```
 
 ## Contaminants vs Races/Ethnicities
@@ -187,11 +190,10 @@ full <- UCMR %>%
 ### Plotting
 
 ```{r plotting contams and race/eth, echo=F, warning=F, message=F}
-ggplot(full, aes(x = Prop, y = ContamLevel)) +
+ggplot(full, aes(x = Prop, y = LogLevel)) +
   geom_point(alpha = 0.08) +
   geom_smooth(se = FALSE, formula = y~x, color = "goldenrod") +
   facet_grid(Contaminant ~ RaceEth, switch = "both", scale = "free") +
-  scale_y_log10() +
   theme_classic() +
   theme(axis.text.x = element_text(angle = -90, vjust = 0.4))
 ```
@@ -216,8 +218,7 @@ In the following analyses, I am mainly testing for the following hypotheses:
 
 ```{r}
 germanium <- full %>% 
-  filter(Contaminant == "germanium") %>% 
-  mutate(LogLevel = log10(ContamLevel))
+  filter(Contaminant == "germanium")
 
 ggplot(germanium, aes(x = Prop, y = LogLevel)) +
   geom_point(alpha = 1) +
@@ -226,7 +227,8 @@ ggplot(germanium, aes(x = Prop, y = LogLevel)) +
   theme_classic() +
   scale_x_continuous(labels = scales::percent)
 
-glm(LogLevel ~ Prop * RaceEth, data = germanium)
+germanium_model <- glm(LogLevel ~ Prop * RaceEth, data = germanium)
+summary(germanium_model)
 ```
 
 The baseline in this model is the proportion of Asian respondents, which observes a staistically significant (p-value $\approx$ 0) negative correlation with the level of germanium. According to this model for each each percent increase of Asian respondents, we would expect to observe, on average, the concentration of germanium in the water decrease by approximately 0.040 $\mu$g/mL. While the p-value is negligible, we cannot say that it equals zerol it is only very close.
@@ -243,50 +245,48 @@ The relationship between the proportions of Black and Indigenous populations and
 manganese <- full %>% 
   filter(Contaminant == "manganese")
 
-ggplot(manganese, aes(x = Prop, y = ContamLevel)) +
+ggplot(manganese, aes(x = Prop, y = LogLevel)) +
   geom_point(alpha = 1) +
-  geom_smooth(method = "glm", se = FALSE,
-       method.args = list(family = "Gamma"), color = "goldenrod") +
-  facet_grid(Contaminant ~ RaceEth, switch = "both", scale = "free") +
+  geom_smooth(se = FALSE, method = "lm", color = "goldenrod") +
+  facet_grid(~ RaceEth, switch = "both", scale = "free") +
   theme_classic() +
-  theme(axis.text.x = element_text(angle = -90, vjust = 0.4))
+  scale_x_continuous(labels = scales::percent)
 
-manganese_model <- glm(ContamLevel ~ Prop * RaceEth, data = manganese, family = Gamma)
-manganese_model2 <- glm(ContamLevel ~ Prop * RaceEth, data = manganese)
-
-rcompanion::compareGLM(manganese_model, manganese_model2)
-
-plot(manganese_model)
-
+manganese_model <- glm(LogLevel ~ Prop * RaceEth, data = manganese)
+summary(manganese_model)
 ```
 
 ```{r}
 HAA6Br <- full %>% 
   filter(Contaminant == "HAA6Br")
-  
-HAA6Br_model <- lm(ContamLevel ~ Prop * RaceEth, data = HAA6Br)
-get_regression_table(HAA6Br_model)
 
-bptest(HAA6Br_model)
+ggplot(HAA6Br, aes(x = Prop, y = LogLevel)) +
+  geom_point(alpha = 1) +
+  geom_smooth(se = FALSE, method = "lm", color = "goldenrod") +
+  facet_grid(~ RaceEth, switch = "both", scale = "free") +
+  theme_classic() +
+  scale_x_continuous(labels = scales::percent)
+
+HAA6Br_model <- glm(LogLevel ~ Prop * RaceEth, data = HAA6Br)
+summary(HAA6Br_model)
 ```
 
 ```{r}
 HAA9 <- full %>% 
   filter(Contaminant == "HAA9")
   
-HAA9_model <- lm(ContamLevel ~ Prop * RaceEth, data = HAA9)
-get_regression_table(HAA9_model)
+ggplot(HAA9, aes(x = Prop, y = LogLevel)) +
+  geom_point(alpha = 1) +
+  geom_smooth(se = FALSE, method = "lm", color = "goldenrod") +
+  facet_grid(~ RaceEth, switch = "both", scale = "free") +
+  theme_classic() +
+  scale_x_continuous(labels = scales::percent)
 
-bptest(HAA6Br_model)
+HAA9_model <- glm(LogLevel ~ Prop * RaceEth, data = HAA9)
+summary(HAA9_model)
 ```
 
-```{r}
-ggplot(full %>% filter(ContamLevel != 0), aes(x = Prop, y = ContamLevel, color = Contaminant)) +
-  geom_point(alpha = 0.1) +
-  geom_smooth(se = FALSE, formula = y~x) +
-  scale_y_log10() +
-  facet_wrap(~ RaceEth)
-```
+
 
 ```{r}
 ggplot(full, aes(x = Predom, y = ContamLevel)) +
@@ -296,10 +296,28 @@ ggplot(full, aes(x = Predom, y = ContamLevel)) +
   scale_y_log10() +
   facet_wrap(~ Contaminant) +
   theme_bw()
+
+
+kruskal.test(ContamLevel ~ Predom, data = manganese %>% group_by(PWSID) %>% slice(1))
+kruskal.test(ContamLevel ~ Predom, data = germanium %>% group_by(PWSID) %>% slice(1))
+kruskal.test(ContamLevel ~ Predom, data = HAA6Br %>% group_by(PWSID) %>% slice(1))
+kruskal.test(ContamLevel ~ Predom, data = HAA9 %>% group_by(PWSID) %>% slice(1))
+
+
+ggplot(full, aes(x = HLFiftyPer, y = ContamLevel)) +
+  geom_violin() +
+  stat_summary(fun.y=median, geom="point", color="goldenrod", fill="goldenrod") +
+  stat_summary(fun.y=mean, geom="point", color="green", fill="green") +
+  scale_y_log10() +
+  facet_wrap(~ Contaminant) +
+  theme_bw()
+
+kruskal.test(ContamLevel ~ HLFiftyPer, data = manganese %>% group_by(PWSID) %>% slice(1))
+kruskal.test(ContamLevel ~ HLFiftyPer, data = germanium %>% group_by(PWSID) %>% slice(1))
+kruskal.test(ContamLevel ~ HLFiftyPer, data = HAA6Br %>% group_by(PWSID) %>% slice(1))
+kruskal.test(ContamLevel ~ HLFiftyPer, data = HAA9 %>% group_by(PWSID) %>% slice(1))
+
 ```
 
-I'm trying to figure out which statistical tests are valid and what I should be using.
-Um check assuptions for ANOVA (violin) for means and see what can be done for linear
-regression. xx :)
-
-
+Decide if you want to do more with hispanic/latino (I think yes -- do a linear regression. This will be simpler than the other linear regressions.)
+And work on references! would do this first. will be a bit of work but not too difficult. <3
