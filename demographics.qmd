@@ -200,7 +200,7 @@ ggplot(full, aes(x = Prop, y = ContamLevel)) +
 ggplot(full, aes(x = MedIncome, y = ContamLevel)) +
   geom_point(alpha = 1) +
   geom_smooth(se = FALSE, formula = y~x, color = "goldenrod") +
-  facet_grid(~ Contaminant, scales = "free_y") +
+  facet_grid(~ Contaminant, scales = "free") +
   theme_classic() +
   theme(axis.text.x = element_text(angle = -90, vjust = 0.4))
 ```
@@ -216,35 +216,17 @@ In the following analyses, I am mainly testing for the following hypotheses:
 
 ```{r}
 germanium <- full %>% 
-  filter(Contaminant == "germanium")
+  filter(Contaminant == "germanium") %>% 
+  mutate(LogLevel = log10(ContamLevel))
 
-germanium_model <- lm(ContamLevel ~ Prop * RaceEth, data = germanium)
-get_regression_table(germanium_model) # %>% 
-  # kable() %>%
-  # kable_minimal()
+ggplot(germanium, aes(x = Prop, y = LogLevel)) +
+  geom_point(alpha = 1) +
+  geom_smooth(se = FALSE, method = "lm", color = "goldenrod") +
+  facet_grid(~ RaceEth, switch = "both", scale = "free") +
+  theme_classic() +
+  scale_x_continuous(labels = scales::percent)
 
-germ_residuals <- get_regression_points(germanium_model)
-
-germanium <- germanium %>% 
-  mutate(Prop_sq = Prop^.5)
-germanium_model2 <- lm(ContamLevel ~ Prop_sq * RaceEth, data = germanium)
-germ_residuals2 <- get_regression_points(germanium_model2)
-
-ggplot(germ_residuals, aes(sample = residual)) +
-  geom_qq_line() +
-  geom_qq() +
-  facet_wrap(~ RaceEth)
-
-ggplot(germ_residuals, aes(x = ContamLevel_hat, y = residual)) +
-  geom_point() +
-  facet_wrap(~ RaceEth)
-# +
-#   geom_smooth(se = FALSE, formula = y~x, color = "goldenrod") +
-#   facet_grid(Contaminant ~ RaceEth, switch = "both") +
-#   scale_y_log10() +
-#   theme_classic() +
-#   theme(axis.text.x = element_text(angle = -90, vjust = 0.4))
-
+glm(LogLevel ~ Prop * RaceEth, data = germanium)
 ```
 
 The baseline in this model is the proportion of Asian respondents, which observes a staistically significant (p-value $\approx$ 0) negative correlation with the level of germanium. According to this model for each each percent increase of Asian respondents, we would expect to observe, on average, the concentration of germanium in the water decrease by approximately 0.040 $\mu$g/mL. While the p-value is negligible, we cannot say that it equals zerol it is only very close.
@@ -255,12 +237,26 @@ For each percent increase in the proportion of people that the water system bein
 
 The relationship between the proportions of Black and Indigenous populations and contaminant levels visually seems to observe a similar pattern demostrated by Asian populations. Statistically, there is no evidence that there is difference in either slope or intercept for these three groups.
 
+#### Manganese levels vs Race/ethnicity served by PWS proportions 
+
 ```{r}
 manganese <- full %>% 
   filter(Contaminant == "manganese")
-  
-manganese_model <- lm(ContamLevel ~ Prop * RaceEth, data = manganese)
-get_regression_table(manganese_model)
+
+ggplot(manganese, aes(x = Prop, y = ContamLevel)) +
+  geom_point(alpha = 1) +
+  geom_smooth(method = "glm", se = FALSE,
+       method.args = list(family = "Gamma"), color = "goldenrod") +
+  facet_grid(Contaminant ~ RaceEth, switch = "both", scale = "free") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = -90, vjust = 0.4))
+
+manganese_model <- glm(ContamLevel ~ Prop * RaceEth, data = manganese, family = Gamma)
+manganese_model2 <- glm(ContamLevel ~ Prop * RaceEth, data = manganese)
+
+rcompanion::compareGLM(manganese_model, manganese_model2)
+
+plot(manganese_model)
 
 ```
 
@@ -270,6 +266,8 @@ HAA6Br <- full %>%
   
 HAA6Br_model <- lm(ContamLevel ~ Prop * RaceEth, data = HAA6Br)
 get_regression_table(HAA6Br_model)
+
+bptest(HAA6Br_model)
 ```
 
 ```{r}
@@ -278,6 +276,8 @@ HAA9 <- full %>%
   
 HAA9_model <- lm(ContamLevel ~ Prop * RaceEth, data = HAA9)
 get_regression_table(HAA9_model)
+
+bptest(HAA6Br_model)
 ```
 
 ```{r}
@@ -301,3 +301,5 @@ ggplot(full, aes(x = Predom, y = ContamLevel)) +
 I'm trying to figure out which statistical tests are valid and what I should be using.
 Um check assuptions for ANOVA (violin) for means and see what can be done for linear
 regression. xx :)
+
+
