@@ -269,6 +269,16 @@ ggplot(HAA6Br, aes(x = Prop, y = LogLevel)) +
 
 HAA6Br_model <- glm(LogLevel ~ Prop * RaceEth, data = HAA6Br)
 summary(HAA6Br_model)
+
+ggplot(HAA6Br, aes(x = HispLat_prop, y = ContamLevel)) +
+  geom_point(alpha = 1) +
+  geom_smooth(se = FALSE, method = "lm", color = "goldenrod") +
+  facet_grid(~ RaceEth, switch = "both", scale = "free") +
+  theme_classic() +
+  scale_x_continuous(labels = scales::percent)
+
+HAA6Br_model <- glm(LogLevel ~ Prop * RaceEth, data = HAA6Br)
+summary(HAA6Br_model)
 ```
 
 ```{r}
@@ -286,6 +296,10 @@ HAA9_model <- glm(LogLevel ~ Prop * RaceEth, data = HAA9)
 summary(HAA9_model)
 ```
 
+
+```{r}
+
+```
 
 
 ```{r}
@@ -319,5 +333,18 @@ kruskal.test(ContamLevel ~ HLFiftyPer, data = HAA9 %>% group_by(PWSID) %>% slice
 
 ```
 
+```{r}
+ggplot(full, aes(x = HispLat_prop, y = LogLevel)) +
+  geom_point(alpha = .1) +
+  geom_smooth(se = FALSE, method = "lm", color = "goldenrod") +
+  theme_classic() +
+  facet_wrap(~ Contaminant)
+  scale_x_continuous(labels = scales::percent)
+
+germanium_model_eth <- glm(LogLevel ~ HispLat_prop, data = germanium)
+summary(germanium_model_eth)
+```
+
+
 Decide if you want to do more with hispanic/latino (I think yes -- do a linear regression. This will be simpler than the other linear regressions.)
-And work on references! would do this first. will be a bit of work but not too difficult. <3
+figure out zotero citations in google docs? not working atm. also reorganize ethnicity parts. and then write results and discussion! almost there!
