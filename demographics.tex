@@ -1,0 +1,660 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrartcl}
+
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+% Make \paragraph and \subparagraph free-standing
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\makeatletter
+\@ifpackageloaded{tcolorbox}{}{\usepackage[many]{tcolorbox}}
+\makeatother
+\makeatletter
+\@ifundefined{shadecolor}{\definecolor{shadecolor}{rgb}{.97, .97, .97}}
+\makeatother
+\makeatletter
+\makeatother
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Appendix B},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Appendix B}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[boxrule=0pt, breakable, interior hidden, enhanced, borderline west={3pt}{0pt}{shadecolor}, frame hidden, sharp corners]}{\end{tcolorbox}}\fi
+
+\hypertarget{appendix-b}{%
+\section{Appendix B}\label{appendix-b}}
+
+All code whose results are shown in the study. (This document is just
+for code transparency, not to display outputs from the code.)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(knitr)}
+\FunctionTok{library}\NormalTok{(kableExtra)}
+\FunctionTok{library}\NormalTok{(ggfortify)}
+\FunctionTok{library}\NormalTok{(performance)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{joining-data}{%
+\subsection{Joining data}\label{joining-data}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# {-}{-}{-}{-}{-}{-}{-}SOURCING DATA{-}{-}{-}{-}{-}{-}{-}{-}}
+\CommentTok{\# variables from https://api.census.gov/data/2020/acs/acs5/groups.html}
+\NormalTok{bg\_shapes }\OtherTok{\textless{}{-}} \FunctionTok{get\_acs}\NormalTok{(}
+  \AttributeTok{geography =} \StringTok{"block group"}\NormalTok{, }
+  \AttributeTok{variables =} \FunctionTok{c}\NormalTok{(}\StringTok{"B02001\_001"}\NormalTok{, }\StringTok{"B02008\_001"}\NormalTok{, }\StringTok{"B02009\_001"}\NormalTok{, }\StringTok{"B02010\_001"}\NormalTok{, }
+                \StringTok{"B02011\_001"}\NormalTok{, }\StringTok{"B19013\_001"}\NormalTok{, }\StringTok{"B03003\_001"}\NormalTok{, }\StringTok{"B03003\_003"}\NormalTok{),}
+  \AttributeTok{state =} \StringTok{"CA"}\NormalTok{, }
+  \AttributeTok{year =} \DecValTok{2020}\NormalTok{,}
+  \AttributeTok{cache\_table =} \ConstantTok{TRUE}\NormalTok{,}
+  \AttributeTok{geometry =} \ConstantTok{TRUE}
+\NormalTok{) }
+
+\CommentTok{\# CSV is too large to push {-}{-} download from https://www.epa.gov/dwucmr/occurrence{-}data{-}unregulated{-}contaminant{-}monitoring{-}rule\#4}
+\NormalTok{UCMR }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\StringTok{"data/UCMR4\_All.csv"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(PWSName }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\StringTok{"Pala North"}\NormalTok{, }\StringTok{"Pauma"}\NormalTok{, }\StringTok{"Pechanga"}\NormalTok{, }\StringTok{"Redding Rancheria"}\NormalTok{, }
+                        \StringTok{"Viejas Community System"}\NormalTok{) }\SpecialCharTok{|}\NormalTok{ State }\SpecialCharTok{==} \StringTok{"CA"}\NormalTok{) }
+
+\NormalTok{govwatershapes }\OtherTok{\textless{}{-}} \FunctionTok{st\_read}\NormalTok{(}\StringTok{"data/SABL\_Public\_230403"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{rename}\NormalTok{(}\StringTok{"PWSID"} \OtherTok{=} \StringTok{"SABL\_PWSID"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(PWSID }\SpecialCharTok{\%in\%} \FunctionTok{unique}\NormalTok{(UCMR}\SpecialCharTok{$}\NormalTok{PWSID)) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{st\_transform}\NormalTok{(}\DecValTok{4269}\NormalTok{)}
+
+\CommentTok{\# .gpkg is too large to push {-}{-} download from https://github.com/SimpleLab{-}Inc/wsb}
+\NormalTok{SLwatershapes }\OtherTok{\textless{}{-}} \FunctionTok{st\_read}\NormalTok{(}\StringTok{"data/temm.gpkg"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \CommentTok{\# https://community.rstudio.com/t/how{-}to{-}open{-}a{-}geopackage{-}file/41027}
+  \FunctionTok{filter}\NormalTok{(pwsid }\SpecialCharTok{\%in\%} \FunctionTok{unique}\NormalTok{(UCMR}\SpecialCharTok{$}\NormalTok{PWSID))}
+
+
+\DocumentationTok{\#\# {-}{-}{-}{-}{-}{-}{-}COMBINING CA PWS AND SIMPLELAB GEOMETRIES{-}{-}{-}{-}{-}{-}{-}{-}}
+\NormalTok{missingPWSs }\OtherTok{\textless{}{-}} \FunctionTok{setdiff}\NormalTok{(}\FunctionTok{unique}\NormalTok{(UCMR}\SpecialCharTok{$}\NormalTok{PWSID), }\FunctionTok{unique}\NormalTok{(govwatershapes}\SpecialCharTok{$}\NormalTok{PWSID)) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{map}\NormalTok{(}\ControlFlowTok{function}\NormalTok{ (x) \{}\FunctionTok{ifelse}\NormalTok{(}\FunctionTok{substr}\NormalTok{(x,}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{) }\SpecialCharTok{==} \StringTok{"9"}\NormalTok{, }\FunctionTok{paste0}\NormalTok{(}\StringTok{"0"}\NormalTok{, x), x)\}) }
+
+\NormalTok{missingshapes }\OtherTok{\textless{}{-}}\NormalTok{ SLwatershapes }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(pwsid }\SpecialCharTok{\%in\%}\NormalTok{ missingPWSs) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{rename}\NormalTok{(}\StringTok{"PWSID"} \OtherTok{=} \StringTok{"pwsid"}\NormalTok{,}
+         \StringTok{"WATER\_SY\_1"} \OtherTok{=} \StringTok{"pws\_name"}\NormalTok{,}
+         \StringTok{"geometry"} \OtherTok{=} \StringTok{"geom"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{select}\NormalTok{(PWSID, WATER\_SY\_1, geometry) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{st\_transform}\NormalTok{(}\DecValTok{4269}\NormalTok{)}
+
+\NormalTok{PWS }\OtherTok{\textless{}{-}} \FunctionTok{bind\_rows}\NormalTok{(missingshapes, govwatershapes)}
+
+\DocumentationTok{\#\# ACS variable codes }
+\CommentTok{\# B02001\_001 Race total B02001\_002 White alone\textbackslash{}}
+\CommentTok{\# B02009\_001 Black alone or in combination }
+\CommentTok{\# B02010\_001 Native American alone or in combination }
+\CommentTok{\# B02011\_001 Asian alone or in combination }
+\CommentTok{\# Hispanic total: B03003\_001 }
+\CommentTok{\# B03003\_003 yes hispanic or latino}
+
+\DocumentationTok{\#\# {-}{-}{-}{-}{-}{-}{-}TRANSFORMING DEMOGRAPHICS DATA{-}{-}{-}{-}{-}{-}{-}{-}}
+\NormalTok{bg\_shapes\_wide }\OtherTok{\textless{}{-}}\NormalTok{ bg\_shapes }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{moe) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{pivot\_wider}\NormalTok{(}\AttributeTok{names\_from =} \StringTok{"variable"}\NormalTok{, }\AttributeTok{values\_from =} \StringTok{"estimate"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{rename}\NormalTok{(}\AttributeTok{Total =}\NormalTok{ B02001\_001,    }
+         \AttributeTok{White =}\NormalTok{ B02008\_001,    }
+         \AttributeTok{Black =}\NormalTok{ B02009\_001,}
+         \AttributeTok{Indigenous =}\NormalTok{ B02010\_001,   }
+         \AttributeTok{Asian =}\NormalTok{ B02011\_001,}
+         \AttributeTok{Total\_Hisp =}\NormalTok{ B03003\_001,   }
+         \AttributeTok{Hisp\_Lat =}\NormalTok{ B03003\_003,}
+         \AttributeTok{Med\_Income =}\NormalTok{ B19013\_001) }\CommentTok{\#\%\textgreater{}\% }
+\CommentTok{\# mutate(White = White / Total,}
+\CommentTok{\#        Black = Black / Total,}
+\CommentTok{\#        Indigenous = Indigenous / Total,}
+\CommentTok{\#        Asian = Asian / Total,}
+\CommentTok{\#        Hisp\_Lat = Hisp\_Lat / Total\_Hisp}
+\CommentTok{\#        )}
+
+\CommentTok{\# Save until after having joined since weighted averages won\textquotesingle{}t work with props}
+\CommentTok{\# Want to use counts}
+
+\CommentTok{\# block\_shapes\_tall\_props \textless{}{-} block\_shapes\_wide \%\textgreater{}\% }
+\CommentTok{\#   pivot\_longer(c(White, Black, Asian, Indigenous, Hisp\_Lat), }
+\CommentTok{\#                names\_to = "race", values\_to = "prop")}
+\CommentTok{\# }
+\CommentTok{\# ggplot(block\_shapes\_tall2, aes(x = race, y = prop, color = race)) + geom\_col()}
+\CommentTok{\# }
+\CommentTok{\# block\_shapes\_vals \textless{}{-} block\_shapes \%\textgreater{}\% }
+\CommentTok{\#   filter(!(Total == 0 \& Total\_Hisp == 0))}
+
+\DocumentationTok{\#\# {-}{-}{-}{-}{-}{-}{-}JOINING AND AVERAGING DEMOGRAPHICS{-}{-}{-}{-}{-}{-}{-}{-}}
+\CommentTok{\# below line sourced from https://github.com/r{-}spatial/sf/issues/493}
+\FunctionTok{sf\_use\_s2}\NormalTok{(}\ConstantTok{FALSE}\NormalTok{) }\CommentTok{\# flattens shapes}
+
+\CommentTok{\# join \textless{}{-} watershapes \%\textgreater{}\% }
+\CommentTok{\#   inner\_join(UCMR\_CA, by = c("pwsid" = "PWSID")) \%\textgreater{}\% }
+\CommentTok{\#   select(pwsid, PWSName, primacy\_agency\_code, primary\_source\_code, tier, FacilityWaterType, CollectionDate, Contaminant, MRL, AnalyticalResultsSign, AnalyticalResultValue.µg.L.) \%\textgreater{}\% }
+\CommentTok{\#   st\_intersection(bg\_shapes) \%\textgreater{}\% }
+\CommentTok{\#   mutate(pwi\_county = paste0(pwsid, "{-}", GEOID))}
+
+
+\CommentTok{\# PWS\_demos\_joined \textless{}{-} st\_join(govwatershapes, bg\_shapes\_wide)}
+
+\NormalTok{shape\_intersections }\OtherTok{\textless{}{-}} \FunctionTok{st\_intersection}\NormalTok{(PWS, bg\_shapes\_wide) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{PWS\_bg =} \FunctionTok{paste0}\NormalTok{(PWSID, }\StringTok{"{-}"}\NormalTok{, GEOID))}
+
+\NormalTok{PWS\_aw\_demographics }\OtherTok{\textless{}{-}}\NormalTok{ shape\_intersections }\SpecialCharTok{\%\textgreater{}\%} 
+  \CommentTok{\#{-}{-}{-} get area {-}{-}{-}\#}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{area =} \FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{st\_area}\NormalTok{(.))) }\SpecialCharTok{\%\textgreater{}\%} 
+  \CommentTok{\#{-}{-}{-} get area{-}weight by HUC unit {-}{-}{-}\#}
+  \FunctionTok{group\_by}\NormalTok{(PWSID) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{weight =}\NormalTok{ area }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(area)) }\SpecialCharTok{\%\textgreater{}\%} 
+  \CommentTok{\#{-}{-}{-} calculate area{-}weighted corn acreage by HUC unit {-}{-}{-}\#}
+  \CommentTok{\# \textquotesingle{}aw\textquotesingle{} stands for area{-}weighted }
+  \FunctionTok{summarize}\NormalTok{(}\AttributeTok{Total\_aw =} \FunctionTok{sum}\NormalTok{(weight }\SpecialCharTok{*}\NormalTok{ Total),}
+            \AttributeTok{White\_aw =} \FunctionTok{sum}\NormalTok{(weight }\SpecialCharTok{*}\NormalTok{ White),}
+            \AttributeTok{Black\_aw =} \FunctionTok{sum}\NormalTok{(weight }\SpecialCharTok{*}\NormalTok{ Black),}
+            \AttributeTok{Indig\_aw =} \FunctionTok{sum}\NormalTok{(weight }\SpecialCharTok{*}\NormalTok{ Indigenous),}
+            \AttributeTok{Asian\_aw =} \FunctionTok{sum}\NormalTok{(weight }\SpecialCharTok{*}\NormalTok{ Asian),}
+            \AttributeTok{Total\_HispLat\_aw =} \FunctionTok{sum}\NormalTok{(weight }\SpecialCharTok{*}\NormalTok{ Total\_Hisp),}
+            \AttributeTok{HispLat\_aw =} \FunctionTok{sum}\NormalTok{(weight }\SpecialCharTok{*}\NormalTok{ Hisp\_Lat),}
+            \AttributeTok{MedIncome\_aw =} \FunctionTok{sum}\NormalTok{(weight }\SpecialCharTok{*}\NormalTok{ Med\_Income)}
+\NormalTok{  )}
+
+\CommentTok{\# saving for posterity (to not have to rerun code)}
+\CommentTok{\# st\_write(PWS\_aw\_demographics, dsn = \textquotesingle{}data/joinedPWSdemos/joinedPWSdemos.shp\textquotesingle{})}
+
+\DocumentationTok{\#\# {-}{-}{-}{-}{-}{-}{-}WRANGLING DEMOGRAPHICS{-}{-}{-}{-}{-}{-}{-}{-}}
+\NormalTok{PWSdemog }\OtherTok{\textless{}{-}}\NormalTok{ PWS\_aw\_demographics }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{White\_prop =}\NormalTok{ White\_aw }\SpecialCharTok{/}\NormalTok{ Total\_aw,}
+         \AttributeTok{Black\_prop =}\NormalTok{ Black\_aw }\SpecialCharTok{/}\NormalTok{ Total\_aw,}
+         \AttributeTok{Indig\_prop =}\NormalTok{ Indig\_aw }\SpecialCharTok{/}\NormalTok{ Total\_aw,}
+         \AttributeTok{Asian\_prop =}\NormalTok{ Asian\_aw }\SpecialCharTok{/}\NormalTok{ Total\_aw,}
+         \AttributeTok{HispLat\_prop =}\NormalTok{ HispLat\_aw }\SpecialCharTok{/}\NormalTok{ Total\_HispLat\_aw)}
+
+\NormalTok{PWSdemog }\OtherTok{\textless{}{-}}\NormalTok{ PWSdemog }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{st\_drop\_geometry}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} \CommentTok{\# max.col() couldn\textquotesingle{}t work with }
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Predom =} \FunctionTok{colnames}\NormalTok{(.[}\DecValTok{10}\SpecialCharTok{:}\DecValTok{13}\NormalTok{])[}\FunctionTok{max.col}\NormalTok{(.[}\DecValTok{10}\SpecialCharTok{:}\DecValTok{13}\NormalTok{])]) }\SpecialCharTok{\%\textgreater{}\%} 
+  \CommentTok{\# above line courtesy of https://stackoverflow.com/questions/17735859/for{-}each{-}row{-}return{-}the{-}column{-}name{-}of{-}the{-}largest{-}value}
+  \FunctionTok{right\_join}\NormalTok{(PWSdemog) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{select}\NormalTok{(PWSID, MedIncome\_aw, White\_prop, Black\_prop,}
+\NormalTok{         Indig\_prop, Asian\_prop, HispLat\_prop, Predom)}
+
+\DocumentationTok{\#\# {-}{-}{-}{-}{-}{-}{-}JOINING W UCMR{-}{-}{-}{-}{-}{-}{-}{-}}
+\NormalTok{contamsOfInterest }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"germanium"}\NormalTok{, }\StringTok{"manganese"}\NormalTok{, }\StringTok{"HAA6Br"}\NormalTok{, }\StringTok{"HAA9"}\NormalTok{)}
+
+\NormalTok{full }\OtherTok{\textless{}{-}}\NormalTok{ UCMR }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{select}\NormalTok{(PWSID, PWSName, Contaminant, AnalyticalResultsSign,}
+\NormalTok{         AnalyticalResultValue.µg.L.) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(Contaminant }\SpecialCharTok{\%in\%}\NormalTok{ contamsOfInterest) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{inner\_join}\NormalTok{(PWSdemog) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{pivot\_longer}\NormalTok{(}\FunctionTok{c}\NormalTok{(White\_prop, Black\_prop, Asian\_prop, Indig\_prop), }
+               \AttributeTok{names\_to =} \StringTok{"RaceEth"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"Prop"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{rename}\NormalTok{(}\AttributeTok{ContamLevel =}\NormalTok{ AnalyticalResultValue.µg.L.,}
+         \AttributeTok{RelativetoMRL =}\NormalTok{ AnalyticalResultsSign,}
+         \AttributeTok{MedIncome =}\NormalTok{ MedIncome\_aw) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(ContamLevel }\SpecialCharTok{!=} \DecValTok{0}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Predom =} \FunctionTok{substr}\NormalTok{(Predom, }\DecValTok{1}\NormalTok{, }\FunctionTok{nchar}\NormalTok{(Predom)}\SpecialCharTok{{-}}\DecValTok{5}\NormalTok{),}
+         \AttributeTok{RaceEth =} \FunctionTok{substr}\NormalTok{(RaceEth, }\DecValTok{1}\NormalTok{, }\FunctionTok{nchar}\NormalTok{(RaceEth)}\SpecialCharTok{{-}}\DecValTok{5}\NormalTok{),}
+         \AttributeTok{RaceEth =} \FunctionTok{ifelse}\NormalTok{(RaceEth }\SpecialCharTok{==} \StringTok{"Indig"}\NormalTok{, }\StringTok{"Indigenous"}\NormalTok{, RaceEth),}
+         \AttributeTok{RaceEth =} \FunctionTok{ifelse}\NormalTok{(RaceEth }\SpecialCharTok{==} \StringTok{"White"}\NormalTok{, }\StringTok{"white"}\NormalTok{, RaceEth),}
+         \AttributeTok{RaceEth =} \FunctionTok{factor}\NormalTok{(RaceEth),}
+         \AttributeTok{Contaminant =} \FunctionTok{ordered}\NormalTok{(Contaminant, }
+                              \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"germanium"}\NormalTok{,}\StringTok{"manganese"}\NormalTok{, }\StringTok{"HAA6Br"}\NormalTok{, }\StringTok{"HAA9"}\NormalTok{)),}
+         \AttributeTok{LogLevel =} \FunctionTok{log10}\NormalTok{(ContamLevel),}
+         \AttributeTok{HLFiftyPer =} \FunctionTok{ifelse}\NormalTok{(HispLat\_prop }\SpecialCharTok{\textgreater{}=} \FunctionTok{median}\NormalTok{(HispLat\_prop), }\StringTok{"Above"}\NormalTok{, }\StringTok{"Below"}\NormalTok{),}
+         \AttributeTok{HLFiftyPer =} \FunctionTok{factor}\NormalTok{(HLFiftyPer, }\AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Above"}\NormalTok{, }\StringTok{"Below"}\NormalTok{))) }
+
+\FunctionTok{write.csv}\NormalTok{(full, }\StringTok{"full.csv"}\NormalTok{, }\AttributeTok{row.names=}\ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Description of data joining: I began by filtering the public water
+system boundary data based on what was available in the UCMR data to
+pare down the spatial data to only what will be relevant for the
+analysis. Then, I joined it with the spatial demographics data from the
+American Community Survey. This join was via spatial joins, which are
+computationally expensive and slow. (Joining PWS and UCMR data would
+create a larger dataset, which would be even slower, so I started here.)
+Using the sf package, I found which block groups overlapped each PWS.
+Then for each PWS, I attributed a proportion (or weight) to each block
+group, representing how much of the PWS boundary it intersected with.
+For instance, if part of block group 1 covered a quarter of the PWS in
+question, block group 1 received a 0.25. Then, other block groups
+overlapping with the PWS are assigned corresponding weights for that
+PWS. It is feasible that block groups appear multiple times in the
+dataset, receiving weights for different PWSs that they overlap with.
+After finding the weights, the weight for block group 1's overlap with
+the PWS in questions is multiplied by the race, ethnicity, and total
+respondent counts. This statistic by weight multiplication occurs for
+each PWS-block group intersection, with PWSs possibly having multiple
+entries if it overlaps with multiple block groups. Then, for each PWS,
+all of the weighted statistics for that PWS are added together to create
+a cumulative weighted average for each of the statistics. The result of
+this join is a dataframe with each PWS appearing once with spatial data
+and weighted average counts of Asian, Black, Indigenous, and white
+respondents as well as a weighted average total of respondents to the
+race question. Similarly, the data contains a weighted average count of
+Hispanic/Latin(o/a) respondents and a weighted average total count of
+respondents to the Hispanic/Latin(o/a) question. These weighted averages
+are often rough estimates, as they make the assumption that the
+distribution of counts is even and consistent throughout an area whereas
+in reality, it's possible that people are not evenly distributed within
+an area. For instance, it's possible that there exist no people in one
+particular overlapping part of a block group and PWS but the counts from
+that block group will still be weighted and attributed to that PWS. With
+this joined dataset, I performed some further data wrangling for later
+data analysis, including converting race/ethnicity counts to proportions
+to create more values that are more comparable across PWSs and creating
+a categorical variable that lists the race that makes up the greatest
+proportion of the population that a PWS serves (according to this data).
+I additionally siphoned ethnicity into a categorical variable indicating
+if a public water system is ``Above'' or ``Below'' the 50th percentile
+for proportion of Hispanic or Latino/a constituents. Then I joined this
+PWS-demographics dataset to the UCMR data using the dplyr package (like
+most of this data wrangling work).
+
+\hypertarget{race-tests}{%
+\subsection{Race tests}\label{race-tests}}
+
+\hypertarget{racial-groupings-regressions}{%
+\subsubsection{Racial groupings
+regressions}\label{racial-groupings-regressions}}
+
+In the following analyses, I am mainly testing for the following
+hypotheses:
+
+\begin{itemize}
+\tightlist
+\item
+  Null hypothesis: The relationship between the amount of germanium in
+  the water and proportion of race will NOT depend on (change with) the
+  race.
+\item
+  Alternative hypothesis: The relationship between the amount of
+  germanium in the water and proportion of race WILL depend on (change
+  with) the race.
+\end{itemize}
+
+The basic form of the output is
+
+where \(\alpha\) and the \(\beta\)s are the values found from the
+regression, and each \(\operatorname{RaceEth}_{\operatorname{x}}\)
+serves as an ``on/off'' switch where if the RaceEth variable is ``x''
+(e.g., Black) at that time, the
+\(\operatorname{RaceEth}_{\operatorname{Black}}\) will equal 1 and all
+others will equal 0, so the coefficients corresponding with Black will
+have an impact while the other coefficients will be ``turned off''.
+
+\hypertarget{germanium-levels-vs-race-served-by-pws-proportions}{%
+\paragraph{Germanium levels vs Race served by PWS
+proportions}\label{germanium-levels-vs-race-served-by-pws-proportions}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{germanium }\OtherTok{\textless{}{-}}\NormalTok{ full }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(Contaminant }\SpecialCharTok{==} \StringTok{"germanium"}\NormalTok{)}
+
+\FunctionTok{ggplot}\NormalTok{(germanium, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Prop, }\AttributeTok{y =}\NormalTok{ LogLevel)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{se =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{color =} \StringTok{"goldenrod"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{facet\_grid}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ RaceEth, }\AttributeTok{scale =} \StringTok{"free"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_classic}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\NormalTok{percent)}
+
+\NormalTok{germanium\_model }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(LogLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Prop }\SpecialCharTok{*}\NormalTok{ RaceEth, }\AttributeTok{data =}\NormalTok{ germanium)}
+\FunctionTok{summary}\NormalTok{(germanium\_model)}
+\end{Highlighting}
+\end{Shaded}
+
+Since the response variable here is the log (base-10) of the contaminant
+concentration, the coefficients are most interpretable when placed as
+the coefficent of 10 to undo the transformation. The baseline in this
+model is the proportion of Asian respondents, which observes a
+staistically significant (p-value \(\approx\) 0) negative correlation
+with the level of germanium. According to this model for each each
+percent increase of Asian respondents, we would expect to observe, on
+average, the concentration of germanium in the water decrease by
+approximately 0.040 \(\mu\)g/L. While the p-value is negligible, we
+cannot say that it equals zerol it is only very close.
+
+For germanium, there appears to be sufficient evidence to reject the
+null hypothesis that the race does not have an impact on the
+relationship between proportion of race and concentration of the
+contaminant. Both white and Hispanic/Latino populations experience an
+increase in germanium concentration in water as the proportion of those
+races increase.
+
+For each percent increase in the proportion of people that the water
+system being Hispanic/Latino, we would expect to observe, on average,
+the concentration of germanium in the water \emph{increase} by (-4.016 +
+5.688 \(\approx\) ) 0.017 \(\mu\)g/L. The rate of increase becomes
+(-4.016 + 5.999 \(\approx\) ) 0.020 \(\mu\)g/L for each percent increase
+in the proportion of served people being white.
+
+The relationship between the proportions of Black and Indigenous
+populations and contaminant levels visually seems to observe a similar
+pattern demonstrated by Asian populations. Statistically, there is no
+evidence that there is difference in either slope or intercept for these
+three groups.
+
+\hypertarget{manganese-levels-vs-race-served-by-pws-proportions}{%
+\paragraph{Manganese levels vs Race served by PWS
+proportions}\label{manganese-levels-vs-race-served-by-pws-proportions}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{manganese }\OtherTok{\textless{}{-}}\NormalTok{ full }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(Contaminant }\SpecialCharTok{==} \StringTok{"manganese"}\NormalTok{)}
+
+\FunctionTok{ggplot}\NormalTok{(manganese, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Prop, }\AttributeTok{y =}\NormalTok{ LogLevel)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{se =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{color =} \StringTok{"goldenrod"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{facet\_grid}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ RaceEth, }\AttributeTok{switch =} \StringTok{"both"}\NormalTok{, }\AttributeTok{scale =} \StringTok{"free"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_classic}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\NormalTok{percent)}
+
+\NormalTok{manganese\_model }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(LogLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Prop }\SpecialCharTok{*}\NormalTok{ RaceEth, }\AttributeTok{data =}\NormalTok{ manganese)}
+\FunctionTok{summary}\NormalTok{(manganese\_model)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{haa6br-levels-vs-race-served-by-pws-proportions}{%
+\paragraph{HAA6Br levels vs Race served by PWS
+proportions}\label{haa6br-levels-vs-race-served-by-pws-proportions}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{HAA6Br }\OtherTok{\textless{}{-}}\NormalTok{ full }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(Contaminant }\SpecialCharTok{==} \StringTok{"HAA6Br"}\NormalTok{)}
+
+\FunctionTok{ggplot}\NormalTok{(HAA6Br, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Prop, }\AttributeTok{y =}\NormalTok{ LogLevel)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{se =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{color =} \StringTok{"goldenrod"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{facet\_grid}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ RaceEth, }\AttributeTok{scale =} \StringTok{"free"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_classic}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\NormalTok{percent)}
+
+\NormalTok{HAA6Br\_model }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(LogLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Prop }\SpecialCharTok{*}\NormalTok{ RaceEth, }\AttributeTok{data =}\NormalTok{ HAA6Br)}
+\FunctionTok{summary}\NormalTok{(HAA6Br\_model)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{haa9-levels-vs-race-served-by-pws-proportions}{%
+\paragraph{HAA9 levels vs Race served by PWS
+proportions}\label{haa9-levels-vs-race-served-by-pws-proportions}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{HAA9 }\OtherTok{\textless{}{-}}\NormalTok{ full }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(Contaminant }\SpecialCharTok{==} \StringTok{"HAA9"}\NormalTok{)}
+  
+\FunctionTok{ggplot}\NormalTok{(HAA9, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Prop, }\AttributeTok{y =}\NormalTok{ LogLevel)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{se =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{color =} \StringTok{"goldenrod"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{facet\_grid}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ RaceEth, }\AttributeTok{switch =} \StringTok{"both"}\NormalTok{, }\AttributeTok{scale =} \StringTok{"free"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_classic}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\NormalTok{percent)}
+
+\NormalTok{HAA9\_model }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(LogLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Prop }\SpecialCharTok{*}\NormalTok{ RaceEth, }\AttributeTok{data =}\NormalTok{ HAA9)}
+\FunctionTok{summary}\NormalTok{(HAA9\_model)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{race-kruskal-wallis-tests}{%
+\subsubsection{Race Kruskal-Wallis
+tests}\label{race-kruskal-wallis-tests}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(full, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Predom, }\AttributeTok{y =}\NormalTok{ ContamLevel)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_violin}\NormalTok{(}\AttributeTok{color =} \StringTok{"black"}\NormalTok{, }\AttributeTok{fill =} \StringTok{"goldenrod"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_log10}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ Contaminant) }\SpecialCharTok{+}
+  \FunctionTok{theme\_classic}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Contaminant concentrations by predominant race"}\NormalTok{,}
+       \AttributeTok{subtitle =} \StringTok{"Note: y{-}axis is log{-}adjusted"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Predominant racial group"}\NormalTok{,}
+       \AttributeTok{y =} \StringTok{"Contaminant level (\textbackslash{}u03bcg/L)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{kruskal.test}\NormalTok{(ContamLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Predom, }\AttributeTok{data =}\NormalTok{ manganese }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{group\_by}\NormalTok{(PWSID) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{slice}\NormalTok{(}\DecValTok{1}\NormalTok{))}
+\FunctionTok{kruskal.test}\NormalTok{(ContamLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Predom, }\AttributeTok{data =}\NormalTok{ germanium }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{group\_by}\NormalTok{(PWSID) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{slice}\NormalTok{(}\DecValTok{1}\NormalTok{))}
+\FunctionTok{kruskal.test}\NormalTok{(ContamLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Predom, }\AttributeTok{data =}\NormalTok{ HAA6Br }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{group\_by}\NormalTok{(PWSID) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{slice}\NormalTok{(}\DecValTok{1}\NormalTok{))}
+\FunctionTok{kruskal.test}\NormalTok{(ContamLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Predom, }\AttributeTok{data =}\NormalTok{ HAA9 }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{group\_by}\NormalTok{(PWSID) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{slice}\NormalTok{(}\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{ethnicity-tests}{%
+\subsection{Ethnicity tests}\label{ethnicity-tests}}
+
+\hypertarget{ethnicity-kruskal-wallis}{%
+\subsubsection{Ethnicity
+Kruskal-Wallis}\label{ethnicity-kruskal-wallis}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(full, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ HLFiftyPer, }\AttributeTok{y =}\NormalTok{ ContamLevel)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_violin}\NormalTok{(}\AttributeTok{color =} \StringTok{"black"}\NormalTok{, }\AttributeTok{fill =} \StringTok{"goldenrod"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_log10}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ Contaminant) }\SpecialCharTok{+}
+  \FunctionTok{theme\_classic}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Contaminant concentrations by Hispanic/Latin(o/a) percentile"}\NormalTok{,}
+       \AttributeTok{subtitle =} \StringTok{"Note: y{-}axis is log{-}adjusted"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Hispanic/Latin(o/a) proportion relative to 50th percentile"}\NormalTok{,}
+       \AttributeTok{y =} \StringTok{"Contaminant level (\textbackslash{}u03bcg/L)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{kruskal.test}\NormalTok{(ContamLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ HLFiftyPer, }\AttributeTok{data =}\NormalTok{ germanium }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{group\_by}\NormalTok{(PWSID) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{slice}\NormalTok{(}\DecValTok{1}\NormalTok{))}
+\FunctionTok{kruskal.test}\NormalTok{(ContamLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ HLFiftyPer, }\AttributeTok{data =}\NormalTok{ manganese }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{group\_by}\NormalTok{(PWSID) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{slice}\NormalTok{(}\DecValTok{1}\NormalTok{))}
+\FunctionTok{kruskal.test}\NormalTok{(ContamLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ HLFiftyPer, }\AttributeTok{data =}\NormalTok{ HAA6Br }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{group\_by}\NormalTok{(PWSID) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{slice}\NormalTok{(}\DecValTok{1}\NormalTok{))}
+\FunctionTok{kruskal.test}\NormalTok{(ContamLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ HLFiftyPer, }\AttributeTok{data =}\NormalTok{ HAA9 }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{group\_by}\NormalTok{(PWSID) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{slice}\NormalTok{(}\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{ethnicity-linear-regressions}{%
+\subsubsection{Ethnicity linear
+regressions}\label{ethnicity-linear-regressions}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(full, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ HispLat\_prop, }\AttributeTok{y =}\NormalTok{ LogLevel)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{se =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{color =} \StringTok{"goldenrod"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_classic}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ Contaminant) }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\NormalTok{percent) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Contaminant concentrations by proportion of Hispanic/Latin(o/a)"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Proportion of Hispanic/Latin(o/a) constituents"}\NormalTok{,}
+       \AttributeTok{y =} \StringTok{"Concentration (log{-}transformed \textbackslash{}u03bcg/L)"}\NormalTok{)}
+
+\NormalTok{germanium\_model\_eth }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(LogLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ HispLat\_prop, }\AttributeTok{data =}\NormalTok{ germanium)}
+\FunctionTok{summary}\NormalTok{(germanium\_model\_eth)}
+
+\NormalTok{manganese\_model\_eth }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(LogLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ HispLat\_prop, }\AttributeTok{data =}\NormalTok{ manganese)}
+\FunctionTok{summary}\NormalTok{(manganese\_model\_eth)}
+
+\NormalTok{HAA6Br\_model\_eth }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(LogLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ HispLat\_prop, }\AttributeTok{data =}\NormalTok{ HAA6Br)}
+\FunctionTok{summary}\NormalTok{(HAA6Br\_model\_eth)}
+
+\NormalTok{HAA9\_model\_eth }\OtherTok{\textless{}{-}} \FunctionTok{glm}\NormalTok{(LogLevel }\SpecialCharTok{\textasciitilde{}}\NormalTok{ HispLat\_prop, }\AttributeTok{data =}\NormalTok{ HAA9)}
+\FunctionTok{summary}\NormalTok{(HAA9\_model\_eth)}
+\end{Highlighting}
+\end{Shaded}
+
+
+
+
+\end{document}
