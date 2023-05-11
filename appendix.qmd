@@ -2,16 +2,33 @@
 title: "appendix"
 format: html
 editor: visual
+execute:
+  warning: false
 ---
 
-## Appendix
+# Appendix A
 
-
-```{r loading packages, echo=F, warning=F}
+```{r}
 library(dplyr)
 library(ggplot2)
+# install.packages("sf") # https://github.com/r-spatial/sf/issues/2035
+library(sf)
+library(tidycensus)
+options(tigris_use_cache = TRUE)
+library(tidyr)
+library(purrr)
+library(lwgeom)
+library(stringr)
+library(moderndive)
+# devtools::install_github(“rstudio/gt”)
+library(knitr)
+library(kableExtra)
+library(ggfortify)
 library(performance)
-library(rcompanion)
+```
+
+```{r loading dataset}
+full <- read.csv("data/full.csv")
 ```
 
 #### Original Visualization
@@ -24,63 +41,109 @@ ggplot(full, aes(x = Prop, y = ContamLevel)) +
   theme(axis.text.x = element_text(angle = -90, vjust = 0.4))
 ```
 
+## Deciding models and checking assumptions
+
 #### Germanium
 
 ##### Deciding model
 ```{r}
-germanium_glm <- glm(ContamLevel ~ Prop * RaceEth, data = germanium, family = Gamma)
+germanium <- full %>% 
+  filter(Contaminant == "germanium")
+
+# race
+germanium_gamma <- glm(ContamLevel ~ Prop * RaceEth, data = germanium, family = Gamma)
+germanium_lm <- glm(ContamLevel ~ Prop * RaceEth, data = germanium)
 germanium_log <- glm(LogLevel ~ Prop * RaceEth, data = germanium)
 
-rcompanion::compareGLM(germanium_glm, germanium_log)
+rcompanion::compareGLM(germanium_gamma, germanium_lm) # gamma wins!
+rcompanion::compareGLM(germanium_gamma, germanium_log) # log-transformed y wins!
+
+# ethnicity
+germanium_lm_eth <- glm(ContamLevel ~ HispLat_prop, data = germanium)
+germanium_log_eth <- glm(LogLevel ~ HispLat_prop, data = germanium)
+
+rcompanion::compareGLM(germanium_lm_eth, germanium_log_eth) # log-transformed y wins!
 ```
-Since smaller AIC, BIC, p-value and larger McFadden are all evidence of a better fit, we choose the second model: log-transforming the response variable.
+Since smaller AIC, BIC, p-value and larger McFadden are all evidence of a better fit, we choose the model with a log-transformed response variable.
 
 ##### Checking assumptions
 
-```{r}
-plot(germanium_glm) # Gamma GLM
+```{r, out.width="50%", fig.show='hold'}
 plot(germanium_log) # log-transformed contaminant levels
 ```
 
 
 #### Manganese
 
-```{r}
+```{r, fig.show="hold", out.width="50%"}
+manganese <- full %>%
+  filter(Contaminant == "manganese")
+
+# race
 manganese_gamma <- glm(ContamLevel ~ Prop * RaceEth, data = manganese, family = Gamma)
 manganese_lm <- glm(ContamLevel ~ Prop * RaceEth, data = manganese)
 manganese_log <- glm(LogLevel ~ Prop * RaceEth, data = manganese)
 
 rcompanion::compareGLM(manganese_gamma, manganese_lm) # gamma wins!
-
-rcompanion::compareGLM(manganese_gamma, manganese_log) # log-adjusted y wins!
+rcompanion::compareGLM(manganese_gamma, manganese_log) # log-transformed y wins!
 
 plot(manganese_log)
+
+# ethnicity
+manganese_lm_eth <- glm(ContamLevel ~ HispLat_prop, data = manganese)
+manganese_log_eth <- glm(LogLevel ~ HispLat_prop, data = manganese)
+
+rcompanion::compareGLM(manganese_lm_eth, manganese_log_eth) # log-transformed y wins!
+
+plot(manganese_log_eth)
 ```
 
 #### HAA6Br
 
-```{r}
+```{r, fig.show="hold", out.width="50%"}
+HAA6Br <- full %>% 
+  filter(Contaminant == "HAA6Br")
+
+# race
 HAA6Br_gamma <- glm(ContamLevel ~ Prop * RaceEth, data = HAA6Br, family = Gamma)
 HAA6Br_lm <- glm(ContamLevel ~ Prop * RaceEth, data = HAA6Br)
 HAA6Br_log <- glm(LogLevel ~ Prop * RaceEth, data = HAA6Br)
 
 rcompanion::compareGLM(HAA6Br_gamma, HAA6Br_lm) # gamma wins!
-
-rcompanion::compareGLM(HAA6Br_gamma, HAA6Br_log) # log-adjusted y wins!
+rcompanion::compareGLM(HAA6Br_gamma, HAA6Br_log) # log-transformed y wins!
 
 plot(HAA6Br_log)
+
+# ethnicity
+HAA6Br_lm_eth <- glm(ContamLevel ~ HispLat_prop, data = HAA6Br)
+HAA6Br_log_eth <- glm(LogLevel ~ HispLat_prop, data = HAA6Br)
+
+rcompanion::compareGLM(HAA6Br_lm_eth, HAA6Br_log_eth) # log-transformed y wins!
+
+plot(HAA6Br_log_eth)
 ```
 
 #### HAA9
 
-```{r}
+```{r, fig.show="hold", out.width="50%"}
+HAA9 <- full %>% 
+  filter(Contaminant == "HAA9")
+
+# race
 HAA9_gamma <- glm(ContamLevel ~ Prop * RaceEth, data = HAA9, family = Gamma)
 HAA9_lm <- glm(ContamLevel ~ Prop * RaceEth, data = HAA9)
 HAA9_log <- glm(LogLevel ~ Prop * RaceEth, data = HAA9)
 
 rcompanion::compareGLM(HAA9_gamma, HAA9_lm) # gamma wins!
-
-rcompanion::compareGLM(HAA9_gamma, HAA9_log) # log-adjusted y wins!
+rcompanion::compareGLM(HAA9_gamma, HAA9_log) # log-transformed y wins!
 
 plot(HAA9_log)
+
+# ethnicity
+HAA9_lm_eth <- glm(ContamLevel ~ HispLat_prop, data = HAA9)
+HAA9_log_eth <- glm(LogLevel ~ HispLat_prop, data = HAA9)
+
+rcompanion::compareGLM(HAA9_lm_eth, HAA9_log_eth) # log-transformed y wins!
+
+plot(HAA9_log_eth)
 ```
