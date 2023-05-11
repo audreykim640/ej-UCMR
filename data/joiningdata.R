@@ -165,9 +165,11 @@ full <- UCMR %>%
   filter(ContamLevel != 0) %>% 
   mutate(Predom = substr(Predom, 1, nchar(Predom)-5),
          RaceEth = substr(RaceEth, 1, nchar(RaceEth)-5),
+         RaceEth = ifelse(RaceEth == "Indig", "Indigenous", RaceEth),
+         RaceEth = ifelse(RaceEth == "White", "white", RaceEth),
          RaceEth = factor(RaceEth),
-         Contaminant = factor(Contaminant, 
-                              levels = c("HAA6Br", "HAA9", "manganese", "germanium")),
+         Contaminant = ordered(Contaminant, 
+                              levels = c("germanium","manganese", "HAA6Br", "HAA9")),
          LogLevel = log10(ContamLevel),
          HLFiftyPer = ifelse(HispLat_prop >= median(HispLat_prop), "Above", "Below"),
          HLFiftyPer = factor(HLFiftyPer, levels = c("Above", "Below"))) 
